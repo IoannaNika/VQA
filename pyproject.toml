@@ -1,0 +1,27 @@
+[project]
+name = "VQA"
+version = "0.0.1"
+authors = [
+  { name="Ioanna Nika" },
+]
+description = "Viral Quasispecies Analysis"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+keywords = ["dl", "ml", "ai", "pytorch", "python", "viral quasispecies", "bioinformatics", "deep learning"]
+dependencies = [
+  'torch',
+  'numpy'
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/IoannaNika/VQA"
+"Bug Tracker" = "https://github.com/IoannaNika/VQA/issues"
