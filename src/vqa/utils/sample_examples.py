@@ -283,6 +283,36 @@ def sample_negative(same_lineage: bool, lineage1: str, lineage2: str = "", data_
 
     return read1_seq, read2_seq, read1_id, read_2_id, id, id2
 
+def sample_single_negative(lineage_anch:str, lineage_neg:str, anchor_id:str, data_dir: str = "data/data/hcov_global_2023-11-16_09-28/split_fasta"):
+    
+    anchor_sample_id = anchor_id.split("_")[:-1]
+    anchor_sample_id = "_".join(anchor_sample_id)[:-1]
+
+
+    data_dir_neg = data_dir + "/" + lineage_neg + "/simulated_reads/"
+    data_dir_anch = data_dir + "/" + lineage_anch + "/simulated_reads/"
+    negative_id, negative_fastq, negative_bed = sample_fastq_bed_file_from_lineage(data_dir_neg)
+
+    while(negative_id == anchor_sample_id):
+        negative_id, negative_fastq, negative_bed = sample_fastq_bed_file_from_lineage(data_dir_neg)
+
+    maf_file_negative = data_dir_neg + negative_id + "/" + negative_id + "_0001.maf"
+    maf_file_anchor = data_dir_anch + anchor_sample_id + "/" + anchor_sample_id + "_0001.maf"
+
+
+    anchor_bed_path = data_dir_anch + anchor_sample_id + "/" + anchor_sample_id + ".bed"
+    anchor_fastq_path = data_dir_anch + anchor_sample_id + "/" + anchor_sample_id + "_0001.fastq"
+
+    anchor_seq, negative_seq, anchord_id, negative_id  = find_overlapping_reads(anchor_bed_path, negative_bed, anchor_fastq_path, negative_fastq)
+
+       # check if the reads are sufficiently different
+    while(check_negative_sample(maf_file_anchor, maf_file_negative, anchord_id, negative_id, anchor_bed_path, negative_bed) == False):
+        anchor_seq, negative_seq, anchord_id, negative_id  = find_overlapping_reads(anchor_bed_path, negative_bed, anchor_fastq_path, negative_fastq)
+
+    return anchor_seq, negative_seq, anchord_id, negative_id, anchor_sample_id, negative_id
+    
+
+
 ############################################################################################################################################################################
 # Input: lineage (str). Optional. If not provided, sample from any lineage
 # Returns: two reads that overlap and their respective read and genome ids

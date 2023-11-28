@@ -22,4 +22,4 @@ src/vqa/data/data/
 
 src/vqa/TCN_siamese_net/*
 src/vqa/wandb/* 
-*.ckpt
+src/vqa/*.ckpt
