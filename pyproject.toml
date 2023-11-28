@@ -20,9 +20,9 @@ dependencies = [
   'lightning',
   'biopython',
   'pandas', 
-  'samtools'
+  'samtools',
   'bedtools',
-  'minimap2'
+  'minimap2',
   'pbsim2',
   'seaborn',
   'matplotlib',
