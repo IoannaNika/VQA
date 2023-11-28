@@ -4,7 +4,7 @@ from sklearn.cluster import DBSCAN
 from sklearn import metrics
 
 
-def cluster_embeddings(embeddings, labels, eps=0.5, min_samples=2):
+def cluster_embeddings(embeddings, labels, eps=0.3, min_samples=2):
     """
     Cluster embeddings using DBSCAN from scikit-learn
     :param embeddings: embeddings to cluster

@@ -17,5 +17,9 @@ lightning_logs/
 # data
 MNIST
 src/vqa/data/data/
-src/vqa/data/datasets
-src/vqa/models
+
+
+
+src/vqa/TCN_siamese_net/*
+src/vqa/wandb/* 
+*.ckpt

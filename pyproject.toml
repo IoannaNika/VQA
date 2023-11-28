@@ -23,7 +23,12 @@ dependencies = [
   'samtools'
   'bedtools',
   'minimap2'
-  'pbsim2'
+  'pbsim2',
+  'seaborn',
+  'matplotlib',
+  'editdistance',
+  'wandb',
+  'scikit-learn'
 ]
 
 [build-system]

@@ -309,40 +309,6 @@ def sample_positive(lineage: str = "",  data_dir: str = "data/data/hcov_global_2
 
     return read1_seq, read2_seq, read1_id, read_2_id, id, id
 
-############################################################################################################################################################################
-# Input: max_len (int), read (str)
-# Returns: padded read. If read is longer than max_len, then truncate the read.
-############################################################################################################################################################################
-def pad_read(max_len: int, read: str):
-    if len(read) < max_len:
-        read += "N" * (max_len - len(read))
-
-    if len(read) > max_len:
-        read = read[:max_len]    
-    return read
-
-############################################################################################################################################################################
-# Input: read (str)
-# Returns: one hot encoded read
-############################################################################################################################################################################
-def one_hot_encode(read: str):
-    # A = [1, 0, 0, 0]
-    # C = [0, 1, 0, 0]
-    # G = [0, 0, 1, 0]
-    # T = [0, 0, 0, 1]
-    # N = [0, 0, 0, 0]
-
-    base_to_encoding_dict = {"A": [1, 0, 0, 0], "C": [0, 1, 0, 0], "G": [0, 0, 1, 0], "T": [0, 0, 0, 1], "N": [0, 0, 0, 0]}
-    encoded_read = []
-    for base in read:
-        encoded_read.append(base_to_encoding_dict[base])
-    
-    # to dataframe
-    encoded_read = pd.DataFrame(encoded_read)
-    return encoded_read.T
-
-
-
 # def main():
     # example of sample positive
     # read1, read2, read1_id, read2_id, id, id2 = sample_positive("XBL.2")
@@ -368,15 +334,6 @@ def one_hot_encode(read: str):
     # print("read2: ", read2)
     # print("read1_id: ", read1_id)
     # print("read2_id: ", read2_id)
-
-    # # example of pad read
-    # read = "ATCG"
-    # padded_read = pad_read(10, read)
-    # print(padded_read)
-
-    # # example of one hot encode
-    # encoded_read = one_hot_encode(padded_read)
-    # print(encoded_read.T)
 
     # parse maf file
     # 

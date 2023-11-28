@@ -2,6 +2,7 @@ import pytorch_lightning as pl
 import torch.optim as optim
 import torch
 import wandb
+import vqa.models.cluster_embeddings as cluster_embeddings
 
 
 class SiameseNetTrainer(pl.LightningModule):
@@ -32,12 +33,13 @@ class SiameseNetTrainer(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        (x0, x1) , y = batch
-        output1,output2 = self.forward(x0, x1)
-        loss = self.criterion(output1,output2, y)
-        self.log('val_loss', loss, prog_bar=True)
-        wandb.log({"val/loss": loss})
-        return loss
+        x , y = batch
+        output = self.model(x)
+        predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings(output, y)
+        wandb.log({"val/n_clusters": n_clusters_})
+        wandb.log({"val/homogeneity": homogeneity})
+        wandb.log({"val/completeness": completeness})
+        return homogeneity
 
     def test_step(self, batch, batch_idx):
         (x0, x1) , y = batch
@@ -56,4 +58,7 @@ class SiameseNetTrainer(pl.LightningModule):
     
     def test_dataloader(self):
         return self.test_datal
+    
+    def val_dataloader(self):
+        return self.val_datal
     

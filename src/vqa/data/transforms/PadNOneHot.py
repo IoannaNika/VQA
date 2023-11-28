@@ -42,15 +42,25 @@ def one_hot_encode(read: str):
 
 
 class PadNOneHot(nn.Module):
-    def __init__(self, max_len: int, pre_or_post: str):
+    def __init__(self, max_len: int, pre_or_post: str, single_read: bool = False):
         super(PadNOneHot, self).__init__()
         self.max_len = max_len
         self.pre_or_post = pre_or_post
+        self.single_read = single_read
 
     def forward(self, data):
-        read_1, read_2 = data
+        if self.single_read == False:
+            read_1, read_2 = data
+            read_1 = pad_read(self.max_len, read_1, self.pre_or_post)
+            read_2 = pad_read(self.max_len, read_2, self.pre_or_post)
+            read_1 = one_hot_encode(read_1)
+            read_2 = one_hot_encode(read_2)
+            return read_1, read_2
+     
+        read_1 = data
         read_1 = pad_read(self.max_len, read_1, self.pre_or_post)
-        read_2 = pad_read(self.max_len, read_2, self.pre_or_post)
         read_1 = one_hot_encode(read_1)
-        read_2 = one_hot_encode(read_2)
-        return read_1, read_2
+
+        return read_1
+
+        
