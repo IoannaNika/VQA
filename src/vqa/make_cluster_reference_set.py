@@ -5,15 +5,16 @@ import json
 import random
 
 
-n = 30
+n = 10000
 # metadata file
-data_dir = 'data/data/hcov_global_2022-08-26_05-12/validation_data_1'
+output_data_dir = "data/data/hcov_global_2022-08-26_05-12"
+data_dir = 'data/data/hcov_global_2022-08-26_05-12/split_fasta'
 
 lineages = os.listdir(data_dir)
 lineages = [lineage for lineage in lineages if lineage != "cluster_reference_set"]
 print(lineages)
 
-new_path = data_dir + "/" + "cluster_reference_set"
+new_path = output_data_dir + "/" + "cluster_reference_set"
 # create a directory to store the reference set
 if not os.path.exists(new_path):
     os.makedirs(new_path)

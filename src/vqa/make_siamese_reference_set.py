@@ -4,7 +4,7 @@ import pandas as pd
 import json
 
 
-n = 100
+n = 10000
 # metadata file
 metadata_file = 'data/data/hcov_global_2023-11-16_09-28/metadata.tsv'
 
@@ -36,6 +36,11 @@ if not os.path.exists('data/data/hcov_global_2023-11-16_09-28/siamese_reference_
 if not os.path.exists('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads'):
     os.makedirs('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads')
 
+# remmove all files in the reads directory
+for filename in os.listdir('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads'):
+   os.remove(os.path.join("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads", filename))
+
+
 reference_set_dict = {}
 
 # sample uniformly positive examples from each clade
@@ -46,10 +51,10 @@ for i in range(int(n/2)):
     lineage = clade_lineage_info[clade_lineage_info['GISAID_clade'] == clade]['pango_lineage'].sample(1).values[0]
 
     # sample a positive example from the lineage
-    read1_seq, read2_seq, read1_id, read_2_id, id, _ = sample_examples.sample_positive(lineage)
+    read1_seq, read2_seq, read1_id, read2_id, id, _ = sample_examples.sample_positive(lineage)
 
-    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read_2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read_2_id, read1_id)):
-        read1_seq, read2_seq, read1_id, read_2_id, id, _ = sample_examples.sample_positive(lineage)
+    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read2_id, read1_id)):
+        read1_seq, read2_seq, read1_id, read2_id, id, _ = sample_examples.sample_positive(lineage)
 
     # write read1 to a file
     with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read1_id), "w") as outfile:
@@ -57,16 +62,16 @@ for i in range(int(n/2)):
         outfile.write("{}\n".format(read1_seq))
     
     # write read2 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read_2_id), "w") as outfile:
-        outfile.write(">{}\n".format(read_2_id))
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read2_id), "w") as outfile:
+        outfile.write(">{}\n".format(read2_id))
         outfile.write("{}\n".format(read2_seq))
 
-    reference_set_dict["{}_{}".format(read1_id, read_2_id)] ={
+    reference_set_dict["{}_{}".format(read1_id, read2_id)] ={
     'clade':clade,
     'lineage': lineage,
     'label': "positive",
     'read1': read1_id,
-    'read2':read_2_id}
+    'read2':read2_id}
 
     ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade) & (ref_set_stats['pango_lineage'] == lineage), 'count'] += 2
 # sample uniformly negative examples from the same  clade and lineage
@@ -87,28 +92,28 @@ for i in range(int(n/4)):
         lineage_dir = os.path.join(data_dir, lineage)
         lineage_count = len([name for name in os.listdir(lineage_dir) if name.endswith(".fasta")])        
     
-    read1_seq, read2_seq, read1_id, read_2_id, id1, id2 =  sample_examples.sample_negative(True, lineage)
+    read1_seq, read2_seq, read1_id, read2_id, id1, id2 =  sample_examples.sample_negative(True, lineage)
 
 
-    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read_2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read_2_id, read1_id)):
-        read1_seq, read2_seq, read1_id, read_2_id, id1, id2 = sample_examples.sample_negative(True, lineage)
+    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read2_id, read1_id)):
+        read1_seq, read2_seq, read1_id, read2_id, id1, id2 = sample_examples.sample_negative(True, lineage)
     
-     # write read1 to a file
+    # write read1 to a file
     with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read1_id), "w") as outfile:
         outfile.write(">{}\n".format(read1_id))
         outfile.write("{}\n".format(read1_seq))
     
     # write read2 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read_2_id), "w") as outfile:
-        outfile.write(">{}\n".format(read_2_id))
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read2_id), "w") as outfile:
+        outfile.write(">{}\n".format(read2_id))
         outfile.write("{}\n".format(read2_seq))
 
-    reference_set_dict["{}_{}".format(read1_id, read_2_id)] ={
+    reference_set_dict["{}_{}".format(read1_id, read2_id)] ={
     'clade':clade,
     'lineage': lineage,
     'label': "negative",
     'read1': read1_id,
-    'read2':read_2_id}
+    'read2':read2_id}
 
     ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade) & (ref_set_stats['pango_lineage'] == lineage), 'count'] += 2
 
@@ -130,10 +135,10 @@ for i in range(int(n/4)):
         lineage_2 = clade_lineage_info[clade_lineage_info['GISAID_clade'] == clade_2]['pango_lineage'].sample(1).values[0]
 
 
-    read1_seq, read2_seq, read1_id, read_2_id, id1, id2 =  sample_examples.sample_negative(False, lineage_1, lineage_2)
+    read1_seq, read2_seq, read1_id, read2_id, id1, id2 =  sample_examples.sample_negative(False, lineage_1, lineage_2)
 
-    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read_2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read_2_id, read1_id)):
-        read1_seq, read2_seq, read1_id, read_2_id, id1, id2 =  sample_examples.sample_negative(False, lineage_1, lineage_2)
+    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read2_id, read1_id)):
+        read1_seq, read2_seq, read1_id, read2_id, id1, id2 =  sample_examples.sample_negative(False, lineage_1, lineage_2)
     
      # write read1 to a file
     with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read1_id), "w") as outfile:
@@ -141,29 +146,34 @@ for i in range(int(n/4)):
         outfile.write("{}\n".format(read1_seq))
     
     # write read2 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read_2_id), "w") as outfile:
-        outfile.write(">{}\n".format(read_2_id))
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read2_id), "w") as outfile:
+        outfile.write(">{}\n".format(read2_id))
         outfile.write("{}\n".format(read2_seq))
 
-    reference_set_dict["{}_{}".format(read1_id, read_2_id)] ={
+    reference_set_dict["{}_{}".format(read1_id, read2_id)] ={
     'clade1':clade_1,
     'lineage1': lineage_1,
     'clade2':clade_2,
     'lineage2': lineage_2,
     'label': "negative",
     'read1': read1_id,
-    'read2':read_2_id}
+    'read2':read2_id}
 
     ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade_1) & (ref_set_stats['pango_lineage'] == lineage_1), 'count'] += 1
     ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade_2) & (ref_set_stats['pango_lineage'] == lineage_2), 'count'] += 1
 
 # write reference set dictionary to a json file
-with open("data/data/hcov_global_2023-11-16_09-28/reference_set.json", "w") as outfile: 
+# remove existing reference set file
+if os.path.exists("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set.json"):
+    os.remove("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set.json")
+
+with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set.json", "w") as outfile: 
     json.dump(reference_set_dict, outfile)
 
+# remove existing reference set stats file
+if os.path.exists("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set_stats.csv"):
+    os.remove("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set_stats.csv")
 # write reference set stats to a csv file
 ref_set_stats.to_csv('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set_stats.csv', index=False)
 
-
-
-
+print("Done")

@@ -23,3 +23,9 @@ src/vqa/data/data/
 src/vqa/TCN_siamese_net/*
 src/vqa/wandb/* 
 src/vqa/*.ckpt
+src/vqa/slurm_*
+TCN-library/*
+src/vqa/checkpoints2/*
+src/vqa/wandb/*
+src/vqa/data/__MACOSX/*
+*.ckpt

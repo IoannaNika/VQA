@@ -4,7 +4,6 @@ import sys
 import argparse
 from Bio import SeqIO
 
-
 def main():
     parser = argparse.ArgumentParser(description="simulate long reads from genomes")
     parser.add_argument('--dir', dest = 'dir', required=True, type=str, help="directory with split fasta files. Expected structure: <dir>/<pango_lineage>/<fasta_file>")
