@@ -2,6 +2,7 @@ import os
 import sys
 import random 
 import pandas as pd
+import editdistance
 
 
 
@@ -111,7 +112,7 @@ def sufficient_overlap(n_bases_overlap: int, bed1_row, bed2_row) -> bool:
 #       genome, then pass the same bed file twice.
 # Returns: two reads that overlap
 ############################################################################################################################################################################
-def find_overlapping_reads(bed_file, bed_file2, fastq_file, fastq_file2, n_bases_overlap = 100):
+def find_overlapping_reads(bed_file, bed_file2, fastq_file, fastq_file2, n_bases_overlap = 1000):
     # find all reads in bed_file that overlap with reads in bed_file2
     # return the number of overlapping reads
     try:
@@ -175,7 +176,7 @@ def parse_maf_file(maf_file, read_id):
 # Input: maf file 1, maf file 2, read1_id, read2_id, bed file 1, bed file 2, distance_threshold
 # Returns: True if the reads are sufficiently different, False otherwise
 ############################################################################################################################################################################
-def check_negative_sample(maf_file_1:str, maf_file_2:str, read1_id:str, read2_id:str, bed_file_1:str, bed_file_2:str, distance_threshold:float = 0.0):
+def check_negative_sample(maf_file_1:str, maf_file_2:str, read1_id:str, read2_id:str, bed_file_1:str, bed_file_2:str, distance_threshold:float = 20.0):
     # get the original read sequences
     read1_seq = parse_maf_file(maf_file_1, read1_id)
     read2_seq = parse_maf_file(maf_file_2, read2_id)
@@ -208,10 +209,9 @@ def check_negative_sample(maf_file_1:str, maf_file_2:str, read1_id:str, read2_id
     overlap_end = min(end_1, end_2)
     
     # calculate hamming distance between the two reads in the overlap region
-    hamming_dist = hamming_distance(read1_seq[overlap_start:overlap_end], read2_seq[overlap_start:overlap_end])
-
+    ed = editdistance.eval(read1_seq[overlap_start:overlap_end], read2_seq[overlap_start:overlap_end])
     # calculate dissimilarity percentage
-    dissimilarity_percentage = hamming_dist / (overlap_end - overlap_start)
+    dissimilarity_percentage = (ed / (overlap_end - overlap_start)) * 100
 
     # check if the dissimilarity percentage is less than the threshold
     if dissimilarity_percentage > distance_threshold:

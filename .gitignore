@@ -29,3 +29,5 @@ src/vqa/checkpoints2/*
 src/vqa/wandb/*
 src/vqa/data/__MACOSX/*
 *.ckpt
+*.out
+*/init_clusters.sh

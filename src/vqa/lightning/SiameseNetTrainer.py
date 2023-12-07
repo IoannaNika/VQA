@@ -5,6 +5,7 @@ import wandb
 import vqa.models.cluster_embeddings as cluster_embeddings
 import torch.nn.functional as F
 import torch.nn as nn
+import numpy as npz
 
 class SiameseNetTrainer(pl.LightningModule):
     def __init__(self, model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler):
@@ -28,28 +29,22 @@ class SiameseNetTrainer(pl.LightningModule):
         (x0, x1) , y = batch
         output1, output2 = self.forward(x0, x1)
         loss = self.criterion(output1, output2, y.to(torch.float))
-        # accuracy = torch.sum(torch.round(output) == y.to(torch.float ))/len(y)
+        euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
+        predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
+        accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
         wandb.log({"train/loss": loss})
-        wandb.log({"val/epoch": self.current_epoch})
-        # wandb.log({"train/accuracy": accuracy})
+        wandb.log({"train/epoch": self.current_epoch})
+        wandb.log({"train/accuracy": accuracy})
         return loss
 
     def validation_step(self, batch, batch_idx):
-        (x0, x1) , y = batch
-        output1, output2 = self.forward(x0, x1)
-        loss = self.criterion(output1, output2, y.to(torch.float ))
-        # accuracy = torch.sum(torch.round(output) == y.to(torch.float ))/len(y)
-        wandb.log({"val/loss": loss})
-        wandb.log({"val/epoch": self.current_epoch})
-        # wandb.log({"val/accuracy": accuracy})
-        return loss
-        # x , y = batch
-        # output = self.model(x)
-        # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings(output, y)
-        # wandb.log({"val/n_clusters": n_clusters_})
-        # wandb.log({"val/homogeneity": homogeneity})
-        # wandb.log({"val/completeness": completeness})
-        # return homogeneity
+        x , y = batch
+        output = self.model(x)
+        predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_kmeans(2,output, y)
+        wandb.log({"val/n_clusters": n_clusters_})
+        wandb.log({"val/homogeneity": homogeneity})
+        wandb.log({"val/completeness": completeness})
+        return homogeneity
      
 
     def test_step(self, batch, batch_idx):

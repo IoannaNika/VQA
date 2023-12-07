@@ -4,7 +4,7 @@ import pandas as pd
 import json
 
 
-n = 10000
+n = 1000000
 # metadata file
 metadata_file = 'data/data/hcov_global_2023-11-16_09-28/metadata.tsv'
 
@@ -30,15 +30,16 @@ ref_set_stats = counts.reset_index(name='count')
 ref_set_stats['count'] = 0
 
 # create a directory to store the reference set
-if not os.path.exists('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set'):
-    os.makedirs('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set')
+if not os.path.exists('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy'):
+    os.makedirs('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy')
+    print("Made it")
 
-if not os.path.exists('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads'):
-    os.makedirs('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads')
+if not os.path.exists('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads'):
+    os.makedirs('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads')
 
 # remmove all files in the reads directory
-for filename in os.listdir('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads'):
-   os.remove(os.path.join("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads", filename))
+for filename in os.listdir('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads'):
+   os.remove(os.path.join("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads", filename))
 
 
 reference_set_dict = {}
@@ -57,12 +58,12 @@ for i in range(int(n/2)):
         read1_seq, read2_seq, read1_id, read2_id, id, _ = sample_examples.sample_positive(lineage)
 
     # write read1 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read1_id), "w") as outfile:
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads/{}.fasta".format(read1_id), "w") as outfile:
         outfile.write(">{}\n".format(read1_id))
         outfile.write("{}\n".format(read1_seq))
     
     # write read2 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read2_id), "w") as outfile:
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads/{}.fasta".format(read2_id), "w") as outfile:
         outfile.write(">{}\n".format(read2_id))
         outfile.write("{}\n".format(read2_seq))
 
@@ -74,51 +75,52 @@ for i in range(int(n/2)):
     'read2':read2_id}
 
     ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade) & (ref_set_stats['pango_lineage'] == lineage), 'count'] += 2
-# sample uniformly negative examples from the same  clade and lineage
-for i in range(int(n/4)): 
 
-    # sample a clade uniformly
-    clade = clade_lineage_info['GISAID_clade'].sample(1).values[0]
-    # sample a lineage uniformly from the clade
-    lineage = clade_lineage_info[clade_lineage_info['GISAID_clade'] == clade]['pango_lineage'].sample(1).values[0]
+# # sample uniformly negative examples from the same  clade and lineage
+# for i in range(int(n/4)): 
 
-    # check how many samples are in the lineage
-    lineage_dir = os.path.join(data_dir, lineage)
-    lineage_count = len([name for name in os.listdir(lineage_dir) if name.endswith(".fasta")])
-    while lineage_count < 2:
-        clade = clade_lineage_info['GISAID_clade'].sample(1).values[0]
-        lineage = clade_lineage_info[clade_lineage_info['GISAID_clade'] == clade]['pango_lineage'].sample(1).values[0]
-        # count number of files that end in .fasta in the lineage directory
-        lineage_dir = os.path.join(data_dir, lineage)
-        lineage_count = len([name for name in os.listdir(lineage_dir) if name.endswith(".fasta")])        
+#     # sample a clade uniformly
+#     clade = clade_lineage_info['GISAID_clade'].sample(1).values[0]
+#     # sample a lineage uniformly from the clade
+#     lineage = clade_lineage_info[clade_lineage_info['GISAID_clade'] == clade]['pango_lineage'].sample(1).values[0]
+
+#     # check how many samples are in the lineage
+#     lineage_dir = os.path.join(data_dir, lineage)
+#     lineage_count = len([name for name in os.listdir(lineage_dir) if name.endswith(".fasta")])
+#     while lineage_count < 2:
+#         clade = clade_lineage_info['GISAID_clade'].sample(1).values[0]
+#         lineage = clade_lineage_info[clade_lineage_info['GISAID_clade'] == clade]['pango_lineage'].sample(1).values[0]
+#         # count number of files that end in .fasta in the lineage directory
+#         lineage_dir = os.path.join(data_dir, lineage)
+#         lineage_count = len([name for name in os.listdir(lineage_dir) if name.endswith(".fasta")])        
     
-    read1_seq, read2_seq, read1_id, read2_id, id1, id2 =  sample_examples.sample_negative(True, lineage)
+#     read1_seq, read2_seq, read1_id, read2_id, id1, id2 =  sample_examples.sample_negative(True, lineage)
 
 
-    while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read2_id, read1_id)):
-        read1_seq, read2_seq, read1_id, read2_id, id1, id2 = sample_examples.sample_negative(True, lineage)
+#     while reference_set_dict.keys().__contains__("{}_{}".format(read1_id, read2_id)) or reference_set_dict.keys().__contains__("{}_{}".format(read2_id, read1_id)):
+#         read1_seq, read2_seq, read1_id, read2_id, id1, id2 = sample_examples.sample_negative(True, lineage)
     
-    # write read1 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read1_id), "w") as outfile:
-        outfile.write(">{}\n".format(read1_id))
-        outfile.write("{}\n".format(read1_seq))
+#     # write read1 to a file
+#     with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads/{}.fasta".format(read1_id), "w") as outfile:
+#         outfile.write(">{}\n".format(read1_id))
+#         outfile.write("{}\n".format(read1_seq))
     
-    # write read2 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read2_id), "w") as outfile:
-        outfile.write(">{}\n".format(read2_id))
-        outfile.write("{}\n".format(read2_seq))
+#     # write read2 to a file
+#     with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads/{}.fasta".format(read2_id), "w") as outfile:
+#         outfile.write(">{}\n".format(read2_id))
+#         outfile.write("{}\n".format(read2_seq))
 
-    reference_set_dict["{}_{}".format(read1_id, read2_id)] ={
-    'clade':clade,
-    'lineage': lineage,
-    'label': "negative",
-    'read1': read1_id,
-    'read2':read2_id}
+#     reference_set_dict["{}_{}".format(read1_id, read2_id)] ={
+#     'clade':clade,
+#     'lineage': lineage,
+#     'label': "negative",
+#     'read1': read1_id,
+#     'read2':read2_id}
 
-    ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade) & (ref_set_stats['pango_lineage'] == lineage), 'count'] += 2
+#     ref_set_stats.loc[(ref_set_stats['GISAID_clade'] == clade) & (ref_set_stats['pango_lineage'] == lineage), 'count'] += 2
 
 # sample uniformly negative examples from different clade/lineage
-for i in range(int(n/4)):
+for i in range(int(n/2)):
     # sample a clade uniformly
     clade_1 = clade_lineage_info['GISAID_clade'].sample(1).values[0]
     # sample a lineage uniformly from the clade
@@ -141,12 +143,12 @@ for i in range(int(n/4)):
         read1_seq, read2_seq, read1_id, read2_id, id1, id2 =  sample_examples.sample_negative(False, lineage_1, lineage_2)
     
      # write read1 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read1_id), "w") as outfile:
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads/{}.fasta".format(read1_id), "w") as outfile:
         outfile.write(">{}\n".format(read1_id))
         outfile.write("{}\n".format(read1_seq))
     
     # write read2 to a file
-    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reads/{}.fasta".format(read2_id), "w") as outfile:
+    with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reads/{}.fasta".format(read2_id), "w") as outfile:
         outfile.write(">{}\n".format(read2_id))
         outfile.write("{}\n".format(read2_seq))
 
@@ -164,16 +166,16 @@ for i in range(int(n/4)):
 
 # write reference set dictionary to a json file
 # remove existing reference set file
-if os.path.exists("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set.json"):
-    os.remove("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set.json")
+if os.path.exists("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reference_set.json"):
+    os.remove("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reference_set.json")
 
-with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set.json", "w") as outfile: 
+with open("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reference_set.json", "w") as outfile: 
     json.dump(reference_set_dict, outfile)
 
 # remove existing reference set stats file
-if os.path.exists("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set_stats.csv"):
-    os.remove("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set_stats.csv")
+if os.path.exists("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reference_set_stats.csv"):
+    os.remove("data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reference_set_stats.csv")
 # write reference set stats to a csv file
-ref_set_stats.to_csv('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set/reference_set_stats.csv', index=False)
+ref_set_stats.to_csv('data/data/hcov_global_2023-11-16_09-28/siamese_reference_set_easy/reference_set_stats.csv', index=False)
 
 print("Done")

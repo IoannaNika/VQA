@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 import json
 import os
+import torch
 
 class SiameseReads(Dataset):
     def __init__(self, directory: str, transform=None):
@@ -18,7 +19,7 @@ class SiameseReads(Dataset):
 
         fasta_1_id = value['read1']
         fasta_2_id = value['read2']
-
+        
         fasta_1_path = os.path.join(self.directory, 'reads', '{}.fasta'.format(fasta_1_id))
         fasta_2_path = os.path.join(self.directory, 'reads', '{}.fasta'.format(fasta_2_id))
 
@@ -29,13 +30,18 @@ class SiameseReads(Dataset):
         
         with open(fasta_2_path, 'r') as fasta_2_file:
             fasta_2 = fasta_2_file.readlines()[1].strip()
-
+            
         target = 1 if value['label'] == 'positive' else 0
 
         data = (fasta_1, fasta_2)
 
         if self.transform:
             data = self.transform(data)
+
+        
+        # print("SR ", torch.sum(data[0]) == len(fasta_1))
+        # print("SR ", torch.sum(data[1]) == len(fasta_2))
+
 
         return data, target
     
