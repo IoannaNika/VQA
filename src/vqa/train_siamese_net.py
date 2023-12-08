@@ -11,13 +11,15 @@ from vqa.data.datasets.ClusterReads import ClusterReads
 from vqa.data.transforms.PadNOneHot import PadNOneHot
 from vqa.loss.ContrastiveSiameseLoss import ContrastiveLoss
 from vqa.loss.ContrastiveCrossEntropy import ContrastiveLoss as CBCE_loss
+from vqa.models.LSTM import LSTM
 import os
 from tcn_lib import TCN
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-max_length = 1021
+max_length = 1000
 
-model = TCN(4, -1, [256]*8, 3, batch_norm = True, weight_norm = True)
+model = LSTM(max_length, 64)
+# model = TCN(4, -1, [32]*8, 3, batch_norm = True, weight_norm = True)
 
 transform = PadNOneHot(max_length,"pre")
 transform_val = PadNOneHot(max_length,"pre", single_read=True)
@@ -34,13 +36,13 @@ train_datal = DataLoader(train_data, batch_size=32, shuffle=True, pin_memory=Tru
 val_datal = DataLoader(val_data, batch_size=32, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
 test_datal = DataLoader(test_data, batch_size=32, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
 
-criterion = ContrastiveLoss(margin=0.2)
+criterion = CBCE_loss()
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 scheduler =  optim.lr_scheduler.ExponentialLR(optimizer, 0.9)
 
 os.environ["WANDB_DIR"] = "/tmp"
-wandb.init(project="TCN_AmpliconSiamese_net")
+wandb.init(project="LSTM_AmpliconSiamese_net")
 wandb_logger = WandbLogger()
 # log loss per epoch
 wandb_logger.watch(model, log='all') 

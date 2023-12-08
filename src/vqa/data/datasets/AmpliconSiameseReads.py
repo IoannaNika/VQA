@@ -11,7 +11,7 @@ class SiameseReads(Dataset):
        
         # read tsv file
         self.reference_set = pd.read_csv(os.path.join(self.directory, 'amplicon_lumc_pairs.tsv'), sep='\t', header=None)
-    
+        # print(self.reference_set)
         self.length = len(self.reference_set)
 
     def __getitem__(self, index: int):
@@ -42,7 +42,7 @@ class SiameseReads(Dataset):
         with open(fasta_2_path, 'r') as fasta_2_file:
             fasta_2 = fasta_2_file.readlines()[1].strip()
             
-        target = 1 if label == 'positive' else 0
+        target = 0 if label == 'positive' else 1
 
         data = (fasta_1, fasta_2)
 
