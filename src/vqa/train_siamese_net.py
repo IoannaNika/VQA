@@ -16,7 +16,7 @@ import os
 from tcn_lib import TCN
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-max_length = 1000
+max_length = 1500
 
 model = LSTM(4, 64)
 # model = TCN(4, -1, [32]*8, 3, batch_norm = True, weight_norm = True)
@@ -38,8 +38,8 @@ test_datal = DataLoader(test_data, batch_size=32, shuffle=False, pin_memory=True
 
 criterion = CBCE_loss()
 
-optimizer = optim.Adam(model.parameters(), lr=1e-2)
-scheduler =  optim.lr_scheduler.ExponentialLR(optimizer, 0.9)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+scheduler =  None #optim.lr_scheduler.ExponentialLR(optimizer, 0.9)
 
 os.environ["WANDB_DIR"] = "/tmp"
 wandb.init(project="LSTM_AmpliconSiamese_net")
