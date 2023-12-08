@@ -17,7 +17,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 max_length = 1021
 
-model = TCN(4, -1, [96]*8, 3, batch_norm = True, weight_norm = True)
+model = TCN(4, -1, [128]*8, 3, batch_norm = True, weight_norm = True)
 
 transform = PadNOneHot(max_length,"pre")
 transform_val = PadNOneHot(max_length,"pre", single_read=True)
@@ -52,7 +52,7 @@ checkpoint_callback = ModelCheckpoint(
     every_n_epochs=10
 )
 siamese_network = SiameseNetTrainer(model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler)
-trainer = pl.Trainer(max_epochs = 60, logger=wandb_logger, callbacks=[checkpoint_callback], devices=1, accelerator='gpu')
+trainer = pl.Trainer(max_epochs = 200, logger=wandb_logger, callbacks=[checkpoint_callback], devices=1, accelerator='gpu')
 trainer.fit(siamese_network)
 trainer.save_checkpoint("checkpoints/amplicon_siamese_net_final.ckpt")
 wandb_logger.experiment.unwatch(model)
