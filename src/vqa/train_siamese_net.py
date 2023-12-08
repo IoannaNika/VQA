@@ -17,7 +17,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 max_length = 1021
 
-model = TCN(4, -1, [128]*8, 3, batch_norm = True, weight_norm = True)
+model = TCN(4, -1, [256]*8, 3, batch_norm = True, weight_norm = True)
 
 transform = PadNOneHot(max_length,"pre")
 transform_val = PadNOneHot(max_length,"pre", single_read=True)
