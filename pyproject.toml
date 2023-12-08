@@ -13,19 +13,6 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 keywords = ["dl", "ml", "ai", "pytorch", "python", "viral quasispecies", "bioinformatics", "deep learning"]
-dependencies = [
-  'torch',
-  'numpy',
-  'torchvision',
-  'lightning',
-  'biopython',
-  'pandas', 
-  'seaborn',
-  'matplotlib',
-  'editdistance',
-  'wandb',
-  'scikit-learn'
-]
 
 [build-system]
 requires = ["setuptools"]
