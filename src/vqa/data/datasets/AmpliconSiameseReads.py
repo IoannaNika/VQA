@@ -42,7 +42,7 @@ class SiameseReads(Dataset):
         with open(fasta_2_path, 'r') as fasta_2_file:
             fasta_2 = fasta_2_file.readlines()[1].strip()
             
-        target = 0 if label == 'positive' else 1
+        target = 1 if label == 'positive' else 0
 
         data = (fasta_1, fasta_2)
 
