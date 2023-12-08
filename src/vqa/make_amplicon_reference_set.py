@@ -86,11 +86,7 @@ def find_overlapping_reads(bed_file, bed_file2, fastq1, fastq2, label, outdir = 
                     with open(os.path.join(outdir, id2 + ".fastq"), "w") as f:
                         f.write("@" + id2 + "\n")
                         f.write(read2)
-
-                    
-                
-                     
-             
+ 
     return result
 
 def parse_fastq(fastq_file):
@@ -113,7 +109,7 @@ def parse_fastq(fastq_file):
     return reads
 
 ##############################################################################################################
-n = 1
+n = 10000
 produce_alignment = False
 
 wuhan_like_1 = ("data/data/amplicon_lumc/trimmed_01_100.fastq", "wuhan_like_1")
