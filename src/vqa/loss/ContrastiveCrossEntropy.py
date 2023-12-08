@@ -14,6 +14,6 @@ class ContrastiveLoss(torch.nn.Module):
         loss = bce_loss(l1_distance, label.unsqueeze(1))
         
         # if the negative class probability is greater than 0.5, then the model predicts the negative class so predicted label is 1 else 0
-        predicted_labels = torch.where(l1_distance > 0.5, torch.tensor([1]).to('gpu'), torch.tensor([0]).to('gpu'))
+        predicted_labels = torch.where(l1_distance > 0.5, torch.tensor([1]).to('cuda:0'), torch.tensor([0]).to('cuda:0'))
         # calculate accuracy
         return loss, predicted_labels
