@@ -28,9 +28,9 @@ class SiameseNetTrainer(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         (x0, x1) , y = batch
         output1, output2 = self.forward(x0, x1)
-        loss = self.criterion(output1, output2, y.to(torch.float))
-        euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
-        predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
+        loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
+        # euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
+        # predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
         accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
         wandb.log({"train/loss": loss})
         wandb.log({"train/epoch": self.current_epoch})
@@ -38,22 +38,32 @@ class SiameseNetTrainer(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x , y = batch
-        output = self.model(x)
-        predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_kmeans(2,output, y)
-        wandb.log({"val/n_clusters": n_clusters_})
-        wandb.log({"val/homogeneity": homogeneity})
-        wandb.log({"val/completeness": completeness})
-        return homogeneity
+        (x0, x1) , y = batch
+        output1, output2 = self.forward(x0, x1)
+        loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
+        euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
+        # predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
+        accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
+        wandb.log({"val/loss": loss})
+        wandb.log({"val/epoch": self.current_epoch})
+        wandb.log({"val/accuracy": accuracy})
+        # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_kmeans(2,output, y)
+        # wandb.log({"val/n_clusters": n_clusters_})
+        # wandb.log({"val/homogeneity": homogeneity})
+        # wandb.log({"val/completeness": completeness})
+        return loss
      
 
     def test_step(self, batch, batch_idx):
         (x0, x1) , y = batch
         output1, output2 = self.forward(x0, x1)
-        loss = self.criterion(output1, output2, y.to(torch.float ))
-        # accuracy = torch.sum(torch.round(output) == y.to(torch.float ))/len(y)
+        loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float ))
+        # euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
+        # predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
+        accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
         wandb.log({"test/loss": loss})
-        # wandb.log({"test/accuracy": accuracy})
+        wandb.log({"test/epoch": self.current_epoch})
+        wandb.log({"test/accuracy": accuracy})
         return loss
         
     
