@@ -7,7 +7,7 @@
 #SBATCH --mem=5120          # Request memory (MB) per node. Default is 1024MB (1GB). For multiple tasks, specify --mem-per-cpu instead
 #SBATCH --output=slurm_%j.out # Set name of output log. %j is the Slurm jobId
 #SBATCH --error=slurm_%j.err # Set name of error log. %j is the Slurm jobId
-#SBATCH --gres=gpu:3 # Request 1 GPU
+#SBATCH --gres=gpu:5 # Request 1 GPU
 
 /usr/bin/nvidia-smi # Check sbatch settings are working (it should show the GPU that you requested)
 

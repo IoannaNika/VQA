@@ -21,7 +21,7 @@ def main():
     max_length = 1200
 
     # model = LSTM(4, 32)
-    model = TCN(4, -1, [256]*8, 3, batch_norm = True, weight_norm = True)
+    model = TCN(4, -1, [512]*8, 3, batch_norm = True, weight_norm = True)
 
     transform = PadNOneHot(max_length,"pre")
     transform_val = PadNOneHot(max_length,"pre", single_read=True)
@@ -56,7 +56,7 @@ def main():
         every_n_epochs=10
     )
     siamese_network = SiameseNetTrainer(model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler)
-    trainer = pl.Trainer(max_epochs = 200, logger=wandb_logger, callbacks=[checkpoint_callback], devices=3, accelerator='gpu')
+    trainer = pl.Trainer(max_epochs = 200, logger=wandb_logger, callbacks=[checkpoint_callback], devices=5, accelerator='gpu')
     trainer.fit(siamese_network)
     trainer.save_checkpoint("checkpoints/amplicon_siamese_net_final.ckpt")
     wandb_logger.experiment.unwatch(model)
