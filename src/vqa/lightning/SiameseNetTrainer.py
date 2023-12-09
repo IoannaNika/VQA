@@ -20,8 +20,8 @@ class SiameseNetTrainer(pl.LightningModule):
     
     def forward(self, input1, input2):
         # change second dimension to the last dimension
-        input1 = input1.transpose(1,2)
-        input2 = input2.transpose(1,2)
+        # input1 = input1.transpose(1,2)
+        # input2 = input2.transpose(1,2)
 
         output1 = self.model(input1) # hidden dimension only
         output2 = self.model(input2) # hidden dimension only
