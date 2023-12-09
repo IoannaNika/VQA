@@ -40,7 +40,7 @@ def main():
 
     criterion = ContrastiveLoss(0.5)
 
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = optim.Adam(model.parameters(), lr=1e-7)
     scheduler =  None #optim.lr_scheduler.ExponentialLR(optimizer, 0.9)
 
     os.environ["WANDB_DIR"] = "/tmp"
