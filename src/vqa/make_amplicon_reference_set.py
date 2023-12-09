@@ -3,7 +3,7 @@ import pandas as pd
 import random
 import editdistance
 
-def check_if_different(read1, read2, threshold= 5):
+def check_if_different(read1, read2, threshold= 20):
     length1 = len(read1)
     length2 = len(read2)
 
@@ -109,7 +109,7 @@ def parse_fastq(fastq_file):
     return reads
 
 ##############################################################################################################
-n = 10000
+n = 100
 produce_alignment = False
 
 wuhan_like_1 = ("data/data/amplicon_lumc/trimmed_01_100.fastq", "wuhan_like_1")

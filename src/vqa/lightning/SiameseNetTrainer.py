@@ -22,13 +22,11 @@ class SiameseNetTrainer(pl.LightningModule):
         # change second dimension to the last dimension
         input1 = input1.transpose(1,2)
         input2 = input2.transpose(1,2)
-        print(input1.shape, input2.shape)
 
         output1 = self.model(input1) # hidden dimension only
         output2 = self.model(input2) # hidden dimension only
         output1 = output1.squeeze(0)
         output2 = output2.squeeze(0)
-        print(output1.shape, output2.shape)
 
         # Compute the distance between the anchor and the unknown, both of shape (batch size, embedding size)
         return output1, output2
@@ -38,8 +36,6 @@ class SiameseNetTrainer(pl.LightningModule):
         (x0, x1) , y = batch
         output1, output2 = self.forward(x0, x1)
         loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
-        # euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
-        # predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
         accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
         wandb.log({"train/loss": loss})
         wandb.log({"train/epoch": self.current_epoch})
@@ -50,8 +46,6 @@ class SiameseNetTrainer(pl.LightningModule):
         (x0, x1) , y = batch
         output1, output2 = self.forward(x0, x1)
         loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
-        # euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
-        # predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
         accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
         wandb.log({"val/loss": loss})
         wandb.log({"val/epoch": self.current_epoch})
@@ -67,8 +61,6 @@ class SiameseNetTrainer(pl.LightningModule):
         (x0, x1) , y = batch
         output1, output2 = self.forward(x0, x1)
         loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float ))
-        # euclidean_distance = F.pairwise_distance(output1, output2, keepdim = True)
-        # predicted_labels = torch.where(euclidean_distance > self.criterion.margin, 0, 1)
         accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
         wandb.log({"test/loss": loss})
         wandb.log({"test/epoch": self.current_epoch})
@@ -77,7 +69,6 @@ class SiameseNetTrainer(pl.LightningModule):
         
     
     def configure_optimizers(self):
-        # optimizer = optim.Adam(self.model.parameters(), lr=2e-5)
         return self.optimizer
     
     def train_dataloader(self):
