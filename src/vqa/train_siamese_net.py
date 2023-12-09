@@ -34,13 +34,13 @@ def main():
 
     torch.manual_seed(20)
     train_data, val_data, test_data = random_split(data, [train_count, val_count, test_count])
-    train_datal = DataLoader(train_data, batch_size=1, shuffle=True, pin_memory=True, num_workers=4, prefetch_factor=8)
-    val_datal = DataLoader(val_data, batch_size=1, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
-    test_datal = DataLoader(test_data, batch_size=1, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
+    train_datal = DataLoader(train_data, batch_size=32, shuffle=True, pin_memory=True, num_workers=4, prefetch_factor=8)
+    val_datal = DataLoader(val_data, batch_size=32, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
+    test_datal = DataLoader(test_data, batch_size=32, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
 
     criterion = ContrastiveLoss(0.5)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.2)
+    optimizer = optim.Adam(model.parameters(), lr=1e-3)
     scheduler =  None #optim.lr_scheduler.ExponentialLR(optimizer, 0.9)
 
     os.environ["WANDB_DIR"] = "/tmp"
