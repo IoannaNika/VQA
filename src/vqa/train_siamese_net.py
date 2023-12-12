@@ -15,6 +15,7 @@ from vqa.models.LSTM import LSTM
 import os
 from tcn_lib import TCN
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import StochasticWeightAveraging
 
 def main():
         
@@ -56,7 +57,8 @@ def main():
         every_n_epochs=10
     )
     siamese_network = SiameseNetTrainer(model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler)
-    trainer = pl.Trainer(max_epochs = 200, logger=wandb_logger, callbacks=[checkpoint_callback], devices=5, accelerator='gpu')
+    trainer = pl.Trainer(max_epochs=200, logger=wandb_logger, accumulate_grad_batches=16, callbacks=[checkpoint_callback, StochasticWeightAveraging(swa_lrs=1e-2)], devices=5, accelerator='gpu')
+
     trainer.fit(siamese_network)
     trainer.save_checkpoint("checkpoints/amplicon_siamese_net_final.ckpt")
     wandb_logger.experiment.unwatch(model)
