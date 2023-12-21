@@ -6,7 +6,7 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-def cluster_embeddings_dbscan(embeddings, labels, eps=0.3, min_samples=2):
+def cluster_embeddings_dbscan(embeddings, labels, eps=0.2, min_samples=1):
     """
     Cluster embeddings using DBSCAN from scikit-learn
     :param embeddings: embeddings to cluster
@@ -27,6 +27,28 @@ def cluster_embeddings_dbscan(embeddings, labels, eps=0.3, min_samples=2):
     homogeneity = metrics.homogeneity_score(predicted_labels, labels)
     completeness = metrics.completeness_score(predicted_labels, labels)
     
+    print("Done clustering")
+    predicted_labels = db.labels_
+    # log number of samples in each cluster
+    # print("Number of samples in each cluster:")
+    # print(np.bincount(predicted_labels))
+    
+    # group true labels by predicted cluster
+    true_labels_by_cluster = {}
+    for i in range(len(predicted_labels)):
+        if predicted_labels[i] not in true_labels_by_cluster:
+            true_labels_by_cluster[predicted_labels[i]] = []
+        true_labels_by_cluster[predicted_labels[i]].append(labels[i]) 
+    
+    # print the true labels in each cluster
+    for cluster in true_labels_by_cluster:
+        print("Cluster " + str(cluster) + ":")
+        print(set(true_labels_by_cluster[cluster]))
+        # print the number of times each label appears in the cluster
+        for lbl in set(true_labels_by_cluster[cluster]):
+            print(lbl + ": " + str(true_labels_by_cluster[cluster].count(lbl)))
+        print("Done")
+
     return db.labels_, n_clusters_, homogeneity, completeness
 
 def cluster_embeddings_kmeans(k, embeddings, labels):

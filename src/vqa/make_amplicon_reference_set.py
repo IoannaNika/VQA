@@ -3,7 +3,7 @@ import pandas as pd
 import random
 import editdistance
 
-def check_if_different(read1, read2, threshold= 20):
+def check_if_different(read1, read2, threshold = 0):
     length1 = len(read1)
     length2 = len(read2)
 
