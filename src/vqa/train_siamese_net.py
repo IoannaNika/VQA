@@ -9,7 +9,9 @@ from vqa.lightning.SiameseNetTrainer import SiameseNetTrainer
 from vqa.data.datasets.SimulatedAmpliconSiameseReads import SiameseReads
 from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
 # from vqa.data.datasets.SiameseReads import SiameseReads
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from vqa.data.datasets.ClusterReads import ClusterReads
+from vqa.data.datasets.LumcClusterReads import ClusterReads as LUMCClusterReads
 from vqa.data.datasets.AmpliconClusterReads import ClusterReads as AmpliconClusterReads
 from vqa.data.transforms.PadNOneHot import PadNOneHot
 from vqa.loss.ContrastiveSiameseLoss import ContrastiveLoss
@@ -23,33 +25,27 @@ def main():
     max_length = 1525
     # max_length = 29900
 
-    # model = LSTM(4, 32)
-    model = TCN(4, -1, [32]*13, 3, batch_norm = True, weight_norm = True)
+    model = LSTM(4, 32)
+    # model = TCN(4, -1, [32]*7, 7, batch_norm = True, weight_norm = True)
     # model = TCN(4, -1, [56]*7, 7, batch_norm = True, weight_norm = True)
-
-    # for name, param in model.named_parameters():
-    #     # initialize orthogonal weights for recurrent layers
-    #     if  "weight_hh" in name:
-    #         print("initializing orthogonal weights for recurrent layer")
-    #         nn.init.orthogonal_(param)
-    #     print(f"Layer: {name}, Mean: {param.data.mean()}, Std: {param.data.std()}")
 
     transform = PadNOneHot(max_length,"pre")
     transform_val = PadNOneHot(max_length,"pre", single_read=True)
     data = SiameseReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/dataset_100000_hard', transform=transform)
     # val_data = SiameseReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/2022_val_dataset", transform=transform)
     # val_data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform=transform)
-    val_data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/2022_val_dataset", transform=transform_val)
-    train_count = int(len(data)*0.9)
-    # val_count = int(len(data)*0.1)
-    test_count = len(data) - train_count
-    val_count = val_data.length
+    # val_data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/2022_val_dataset", transform=transform_val)
+    # val_data = LUMCClusterReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data",transform=transform_val)
+    train_count = int(len(data)*0.8)
+    val_count = int(len(data)*0.1)
+    test_count = len(data) - train_count - val_count
+    # val_count = val_data.length
 
     torch.manual_seed(20)
-    # train_data, val_data, test_data = random_split(data, [train_count, val_count, test_count])
-    train_data, test_data = random_split(data, [train_count, test_count])
+    train_data, val_data, test_data = random_split(data, [train_count, val_count, test_count])
+    # train_data, test_data = random_split(data, [train_count, test_count])
     train_datal = DataLoader(train_data, batch_size=20, shuffle=True, pin_memory=True, num_workers=4, prefetch_factor=8)
-    val_datal = DataLoader(val_data, batch_size=1500 , shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
+    val_datal = DataLoader(val_data, batch_size=20 , shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
     test_datal = DataLoader(test_data, batch_size=20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
     
     criterion = ContrastiveLoss(2)
@@ -65,14 +61,17 @@ def main():
 
     # save the model every 10 epochs
     checkpoint_callback = ModelCheckpoint(
-        dirpath='checkpoints/',
+        dirpath='checkpoints_p7/',
         filename='siamese_net-{epoch:02d}',
-        every_n_epochs=10
+        every_n_epochs=1
     )
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=7, verbose=False, mode="min")
+
     siamese_network = SiameseNetTrainer(model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler)
-    trainer = pl.Trainer(max_epochs=100, logger=wandb_logger, accumulate_grad_batches=50, callbacks=[checkpoint_callback], devices=1, accelerator='gpu')
+    trainer = pl.Trainer(max_epochs=100, logger=wandb_logger, accumulate_grad_batches=50, callbacks=[checkpoint_callback, early_stop_callback], devices=1, accelerator='gpu')
     trainer.fit(siamese_network)
-    trainer.save_checkpoint("checkpoints/siamese_net_final.ckpt")
+    print(checkpoint_callback.best_model_path)
+    trainer.save_checkpoint("checkpoints_p7/siamese_net_final.ckpt")
     wandb_logger.experiment.unwatch(model)
     trainer.test()
 

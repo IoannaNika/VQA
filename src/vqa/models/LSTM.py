@@ -9,4 +9,8 @@ class LSTM(nn.Module):
 
     def forward(self, x_t: torch.Tensor):
         _, (h_t, _) = self._lstm(x_t)
+        # print("Hidden dimension", h_t.shape)
+        # concatenate the forward and backward hidden states
+        # h_t = torch.cat((h_t[0], h_t[1]), dim=1)
+        # print("Hidden dimension", h_t.shape)
         return h_t

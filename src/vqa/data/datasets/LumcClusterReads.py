@@ -8,21 +8,16 @@ class ClusterReads(Dataset):
         self.directory = directory
         self.transform = transform
         self.genomic_region = genomic_region
-        self.reference_set = pd.read_csv(os.path.join(self.directory, 'single_samples.tsv'), sep='\t', header=0)
+        self.reference_set = pd.read_csv(os.path.join(self.directory, 'lumc_dataset_singles.tsv'), sep='\t', header=0)
         if self.genomic_region != None:
-            self.reference_set = self.reference_set[self.reference_set["genomic_region"] == self.genomic_region]
+            self.reference_set = self.reference_set[self.reference_set["genomic_regions"] == self.genomic_region]
         self.length = len(self.reference_set)
 
     def __getitem__(self, index: int):
 
         row = self.reference_set.iloc[index]
-        read_path = os.path.join(self.directory, "reads", row["read_id"] + ".fasta")
-
-        with open(read_path, 'r') as read_f:
-            read = read_f.readlines()[1].strip()
-        
-        data = read
-        target = row["label"] + "_" + row["genomic_region"]
+        data = row["read"]
+        target = str(row["file"]) + "_" + row["genomic_regions"]
 
         if self.transform:
             data = self.transform(data)

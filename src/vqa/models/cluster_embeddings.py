@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 import numpy as np
+from collections import Counter
 
 def cluster_embeddings_dbscan(embeddings, labels, eps=0.2, min_samples=1):
     """
@@ -17,15 +18,30 @@ def cluster_embeddings_dbscan(embeddings, labels, eps=0.2, min_samples=1):
     """
     embeddings = embeddings.cpu().numpy()
     print("Clustering")
-    db = DBSCAN(eps=eps, min_samples=min_samples).fit(embeddings)
+
+    embeddings_filtered = []
+    labels_filtered = []
+
+    # get rid of embeddings for which their label appears only once
+    labels_counter = Counter(labels)
+    
+    for embedding, label in zip(embeddings, labels):
+        if labels_counter[label] < 2:
+            continue
+        embeddings_filtered.append(embedding)
+        labels_filtered.append(label)
+
+    
+    print("Embedding length: ", len(embeddings[0]))
+    db = DBSCAN(eps=eps, min_samples=min_samples).fit(embeddings_filtered)
     print("Done clustering")
     predicted_labels = db.labels_
     # Number of clusters in labels, ignoring noise if present.
     n_clusters_ = len(set(predicted_labels)) - (1 if -1 in predicted_labels else 0)
-    print("True labels", set(labels))
+    print("True labels", set(labels_filtered))
     print("Predicted labels", set(predicted_labels))
-    homogeneity = metrics.homogeneity_score(predicted_labels, labels)
-    completeness = metrics.completeness_score(predicted_labels, labels)
+    homogeneity = metrics.homogeneity_score(predicted_labels, labels_filtered)
+    completeness = metrics.completeness_score(predicted_labels, labels_filtered)
     
     print("Done clustering")
     predicted_labels = db.labels_
@@ -38,7 +54,7 @@ def cluster_embeddings_dbscan(embeddings, labels, eps=0.2, min_samples=1):
     for i in range(len(predicted_labels)):
         if predicted_labels[i] not in true_labels_by_cluster:
             true_labels_by_cluster[predicted_labels[i]] = []
-        true_labels_by_cluster[predicted_labels[i]].append(labels[i]) 
+        true_labels_by_cluster[predicted_labels[i]].append(labels_filtered[i]) 
     
     # print the true labels in each cluster
     for cluster in true_labels_by_cluster:
