@@ -12,47 +12,66 @@ import wandb
 from pytorch_lightning.loggers import WandbLogger
 import os
 import pytorch_lightning as pl
+from vqa.loss.ContrastiveSiameseLoss import ContrastiveLoss
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from vqa.data.datasets.AmpliconClusterReads import ClusterReads as AmpliconClusterReads
+from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
+import vqa.models.cluster_embeddings as cluster_embeddings
 
 max_length = 1525
 lstm = LSTM(4,32)
 
-os.environ["WANDB_DIR"] = "/tmp"
-wandb.init(project="TCN_Siamese_net")
-wandb_logger = WandbLogger()
+# os.environ["WANDB_DIR"] = "/tmp"
+# wandb.init(project="TCN_Siamese_net")
+# wandb_logger = WandbLogger()
 
-wandb_logger.watch(lstm, log='all') 
+# wandb_logger.watch(lstm, log='all') 
 
-
-transform = PadNOneHot(max_length,"pre", single_read=True)
 genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 5337),
                     (5286, 6358), (6307, 7379), (7328, 8363), (8282, 9378), (9327, 10429),
                     (10370, 11447), (11394, 12538), (12473, 13599), (13532, 14619),
                     (14568, 15713), (15634, 16698), (16647, 17732), (17649, 18684),
                     (18618, 19655), (19604, 20676), (20581, 21620), (21562, 22590),
                     (22537, 23609), (23544, 24714), (24658, 25768), (25712, 26835),
-                    (26766, 27872), (27808, 28985), (28699, 29768)]
-checkpoint_path = "checkpoints_p7/siamese_net-epoch=99.ckpt"
+                    (26766, 27872), (27808, 28985), (28699, 29768), (29768, 29790)]
+
+# genomic_regions = [(3166, 4240)]
+checkpoint_path =  "checkpoints_triplet/siamese_net_red.ckpt"
 checkpoint = torch.load(checkpoint_path)
 
-    
-model = SiameseNetTrainer.load_from_checkpoint(checkpoint_path, model = lstm, train_datal = None, val_datal = None, test_datal = None, criterion = None, optimizer = None, scheduler = None)
+criterion = ContrastiveLoss(1)
+
+model = SiameseNetTrainer.load_from_checkpoint(checkpoint_path, model = lstm, train_datal = None, val_datal = None, test_datal = None, criterion = criterion, optimizer = None, scheduler = None)
 model.eval()
-trainer =  trainer = pl.Trainer(logger=wandb_logger, devices=1, accelerator='gpu')
+trainer =  trainer = pl.Trainer(devices=1, accelerator='gpu', enable_progress_bar=False)
+outputs = dict()
+labels = dict()
 
 for gr in genomic_regions:
-    gr = str(gr[0]) + "_" + str(gr[1])   
-    # data = LUMCClusterReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform=transform, genomic_region = gr)
-    data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/2022_val_dataset", transform=transform,  genomic_region = gr)
-
+    gr = str(gr[0]) + "_" + str(gr[1])  
+    outputs[gr] = []
+    labels[gr] = []
+    # data = LUMCClusterReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/", transform=transform, genomic_region = gr)
+    # data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/sars_cov2_BA.2/dataset/", transform=PadNOneHot(max_length,"pre", single_read=True),  genomic_region = gr)
+    # data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform= PadNOneHot(max_length,"pre"), genomic_region=gr)
+    data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/pox_B.1.17/dataset", transform=PadNOneHot(max_length,"pre", single_read=False), genomic_region = gr)
+    print("Genomic region: ", gr, "\n")
     if data.length <= 0:
-        continue
-    datal = DataLoader(data, batch_size=data.length, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
-    trainer.test(model, dataloaders = datal)
+        continue 
 
-
+    datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
+    print("Total amount of data: ", data.length)
+    out =  trainer.test(model, dataloaders = datal)
+    # print("Accuracy: ", torch.mean(torch.FloatTensor(out)))
+    # for batch in out:
+    #     for item in batch[0]:
+    #         outputs[gr].append(item)
+    #     for item in batch[1]:
+    #         labels[gr].append(item)
+    # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(outputs[gr], labels[gr], genomic_region=gr, produce_plots=True, eps=1.0, verbose=False)
+    # print("Clusters: ", n_clusters_, " Homogeneity: ", homogeneity, " Completeness: ", completeness)
+    
 
 # model.eval()
 # # predict with the model

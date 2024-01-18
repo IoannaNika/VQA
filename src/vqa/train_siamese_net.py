@@ -31,7 +31,7 @@ def main():
 
     transform = PadNOneHot(max_length,"pre")
     transform_val = PadNOneHot(max_length,"pre", single_read=True)
-    data = SiameseReads(directory='data/dataset_500000', transform=transform)
+    data = SiameseReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_test_100000', transform=transform)
     # val_data = SiameseReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/2022_val_dataset", transform=transform)
     # val_data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform=transform)
     # val_data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/2022_val_dataset", transform=transform_val)
@@ -61,7 +61,7 @@ def main():
 
     # save the model every 10 epochs
     checkpoint_callback = ModelCheckpoint(
-        dirpath='checkpoints_500K/',
+        dirpath='checkpoints_tupled_triplets/',
         filename='siamese_net-{epoch:02d}',
         every_n_epochs=1
     )
@@ -71,7 +71,7 @@ def main():
     trainer = pl.Trainer(max_epochs=100, logger=wandb_logger, accumulate_grad_batches=50, callbacks=[checkpoint_callback, early_stop_callback], devices=1, accelerator='gpu')
     trainer.fit(siamese_network)
     print(checkpoint_callback.best_model_path)
-    trainer.save_checkpoint("checkpoints_500K/siamese_net_final.ckpt")
+    trainer.save_checkpoint("checkpoints_tupled_triplets/siamese_net_final.ckpt")
     wandb_logger.experiment.unwatch(model)
     trainer.test()
 

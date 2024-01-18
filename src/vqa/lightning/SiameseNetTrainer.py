@@ -6,6 +6,8 @@ import vqa.models.cluster_embeddings as cluster_embeddings
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as npz
+from torcheval.metrics.functional import multiclass_f1_score
+
 
 class SiameseNetTrainer(pl.LightningModule):
     def __init__(self, model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler):
@@ -18,16 +20,14 @@ class SiameseNetTrainer(pl.LightningModule):
         self.test_datal = test_datal
         self.val_datal = val_datal
     
-    # def forward(self, input1):
-    #     # change second dimension to the last dimension
-    #     input1 = input1.transpose(1,2)
-    #     output1 = self.model(input1) # hidden dimension only
-    #     output1 = output1.squeeze(0)
+    def forward(self, input1):
+        # change second dimension to the last dimension
+        input1 = input1.transpose(1,2)
+        output1 = self.model(input1) # hidden dimension only
+        output1 = output1.squeeze(0)
+        return output1
 
-    #     return output1
-
-
-    def forward(self, input1, input2):
+    def forward_double(self, input1, input2):
         # change second dimension to the last dimension
         input1 = input1.transpose(1,2)
         input2 = input2.transpose(1,2)
@@ -35,14 +35,13 @@ class SiameseNetTrainer(pl.LightningModule):
         output2 = self.model(input2) # hidden dimension only
         output1 = output1.squeeze(0)
         output2 = output2.squeeze(0)
-
         # Compute the distance between the anchor and the unknown, both of shape (batch size, embedding size)
         return output1, output2
 
   
     def training_step(self, batch, batch_idx):
         (x0, x1) , y = batch
-        output1, output2 = self.forward(x0, x1)
+        output1, output2 = self.forward_double(x0, x1)
         # print("output1: ", output1, "output2: ", output2, "y: ", y)
         loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
         # predicted_labels = predicted_labels.squeeze(1)
@@ -53,7 +52,7 @@ class SiameseNetTrainer(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         (x0, x1) , y = batch
-        output1, output2 = self.forward(x0, x1)
+        output1, output2 = self.forward_double(x0, x1)
         print("output1: ", output1, "output2: ", output2)
         loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
         accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
@@ -76,19 +75,28 @@ class SiameseNetTrainer(pl.LightningModule):
     #     return homogeneity
 
     def test_step(self, batch, batch_idx):
+        (x0, x1) , y = batch
+        output1, output2 = self.forward_double(x0, x1)
+        loss, predicted_labels = self.criterion(output1, output2, y.to(torch.float))
+        accuracy = torch.mean((predicted_labels == y.to(torch.float)).to(torch.float))
+        self.log('accuracy', accuracy, on_epoch=True)
+        f1 = multiclass_f1_score(predicted_labels, y, num_classes=2, average="weighted")
+        self.log('f1', f1, on_epoch=True)
+        # wandb.log({"epoch": self.current_epoch, "test/loss": loss})
+        # wandb.log({"epoch": self.current_epoch, "test/accuracy": accuracy})
+        return accuracy
+
+    def predict_step(self, batch, batch_idx):
         x, y = batch
-        print(x.shape)
         x = x.transpose(1,2)
-        print(x.shape)
         output = self.model(x)
         output = output.squeeze(0)
-        print("output", output)
-        predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(output, y)
-        wandb.log({"epoch": self.current_epoch, "test/n_clusters": n_clusters_})
-        wandb.log({"epoch": self.current_epoch, "test/homogeneity": homogeneity})
-        wandb.log({"epoch": self.current_epoch, "test/completeness": completeness})
-        return output
-      
+        # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(output, y)
+        # wandb.log({"epoch": self.current_epoch, "test/n_clusters": n_clusters_})
+        # wandb.log({"epoch": self.current_epoch, "test/homogeneity": homogeneity})
+        # wandb.log({"epoch": self.current_epoch, "test/completeness": completeness})
+        # print("Clusters: ", n_clusters_, "Homogeneity: ", homogeneity, "Completeness: ", completeness)
+        return output, y
 
     def configure_optimizers(self):
         return self.optimizer

@@ -11,7 +11,8 @@ class TripletNetTrainer(pl.LightningModule):
     def __init__(self, model, train_datal, val_datal, test_datal,optimizer):
         super().__init__()
         self.model = model
-        self.criterion = nn..TripletMarginLoss(margin=2.0, p=2, eps=1e-7)
+        self.margin = 1
+        self.criterion = nn.TripletMarginLoss(margin=self.margin, p=2, eps=1e-7)
         self.optimizer = optimizer
         self.train_datal = train_datal
         self.test_datal = test_datal
@@ -34,19 +35,21 @@ class TripletNetTrainer(pl.LightningModule):
 
   
     def training_step(self, batch, batch_idx):
-        (x0, x1, x2) , y = batch
+        x0, x1, x2 = batch
         output1, output2, output3 = self.forward(x0, x1, x2)
         # anchor, positive, negative
-        loss, predicted_labels, accuracy = self.criterion(output1, output2, output3)
+        loss = self.criterion(output1, output2, output3)
+        accuracy = self.get_accuracy(self.margin, output1, output2, output3)
         wandb.log({"epoch": self.current_epoch, "train/loss": loss})
         wandb.log({"epoch": self.current_epoch, "train/accuracy": accuracy})
         return loss
 
     def validation_step(self, batch, batch_idx):
-        (x0, x1, x2) , y = batch
+        x0, x1, x2 = batch
         # anchor, positive, negative
         output1, output2, output3 = self.forward(x0, x1, x2)
         loss = self.criterion(output1, output2, output3)
+        accuracy = self.get_accuracy(self.margin, output1, output2, output3)
         self.log("val_loss", loss,  batch_size = 20) 
         wandb.log({"epoch": self.current_epoch, "val/loss": loss})
         wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
@@ -54,7 +57,7 @@ class TripletNetTrainer(pl.LightningModule):
     
 
     def test_step(self, batch, batch_idx):
-        (x0, x1, x2) , y = batch
+        x0, x1, x2 = batch
         output1, output2, output3 = self.forward(x0, x1, x2)
         # anchor, positive, negative
         loss = self.criterion(output1, output2, output3)
@@ -63,16 +66,17 @@ class TripletNetTrainer(pl.LightningModule):
         wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
         return {"val_loss": loss}
       
-    def get_accuracy(self, margin):
-        euclidean_distanc_pos = F.pairwise_distance(output1, output2, keepdim = True) 
-        euclidean_distanc_neg = F.pairwise_distance(output1, output3, keepdim = True) 
+    def get_accuracy(self, margin, output1, output2, output3):
+        euclidean_distance_pos = F.pairwise_distance(output1, output2, keepdim = True) 
+        euclidean_distance_neg = F.pairwise_distance(output1, output3, keepdim = True) 
 
         predicted_labels_pos = torch.where(euclidean_distance_pos > self.margin, 0, 1)
-        predicted_labels_neg = torch.where(euclidean_distance_pos > self.margin, 0, 1)
+        predicted_labels_neg = torch.where(euclidean_distance_neg > self.margin, 0, 1)
 
-        #TODO
-
-        return
+        accuracy_pos = torch.sum(predicted_labels_pos == 1).item() / len(predicted_labels_pos)
+        accuracy_neg = torch.sum(predicted_labels_neg == 0).item() / len(predicted_labels_neg)
+        accuracy = (accuracy_pos + accuracy_neg) / 2
+        return accuracy
     
     def configure_optimizers(self):
         return self.optimizer
