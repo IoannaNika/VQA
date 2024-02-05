@@ -22,19 +22,13 @@ class SiameseNetTrainer(pl.LightningModule):
     
     def forward(self, input1):
         # change second dimension to the last dimension
-        # input1 = input1.transpose(1,2)
         output1 = self.model(input1) # hidden dimension only
-        # output1 = output1.squeeze(0)
         return output1
 
     def forward_double(self, input1, input2):
         # change second dimension to the last dimension
-        # input1 = input1.transpose(1,2)
-        # input2 = input2.transpose(1,2)
         output1 = self.model(input1) # hidden dimension only
         output2 = self.model(input2) # hidden dimension only
-        # output1 = output1.squeeze(0)
-        # output2 = output2.squeeze(0)
         # Compute the distance between the anchor and the unknown, both of shape (batch size, embedding size)
         return output1, output2
 
@@ -63,10 +57,8 @@ class SiameseNetTrainer(pl.LightningModule):
      
     # def validation_step(self, batch, batch_idx):
     #     x, y = batch
-    #     x = x.transpose(1,2)
     #     output = self.model(x)
     #     print("output: ", output)
-    #     output = output.squeeze(0)
     #     predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(output, y)
     #     print("predicted_labels" , predicted_labels)
     #     wandb.log({"epoch": self.current_epoch, "val/n_clusters": n_clusters_})
@@ -88,9 +80,7 @@ class SiameseNetTrainer(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx):
         x, y = batch
-        # x = x.transpose(1,2)
         output = self.model(x)
-        # output = output.squeeze(0)
         # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(output, y)
         # wandb.log({"epoch": self.current_epoch, "test/n_clusters": n_clusters_})
         # wandb.log({"epoch": self.current_epoch, "test/homogeneity": homogeneity})
