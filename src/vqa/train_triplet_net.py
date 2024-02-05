@@ -39,18 +39,11 @@ def main():
     # log loss per epoch
     wandb_logger.watch(model, log='all') 
 
-    # save the model every 10 epochs
-    # checkpoint_callbacks = ModelCheckpoint(
-    #     dirpath='checkpoints_triplet_primers_v4/',
-    #     filename='siamese_net-{epoch:02d}',
-    #     every_n_epochs=1
-    # )
-    
     check_point_dir = "checkpoints_triplet_primers_fixed_max_val_e0.3m0.3/best_rsii_3x9/"
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=5, verbose=False, mode="min")
     checkpoint_callback = ModelCheckpoint(dirpath=check_point_dir, save_top_k=3, monitor="val_acc", mode="max")
-
-    triplet_network = TripletNetTrainer(model, train_datal, val_datal, test_datal,optimizer)
+    margin = 0.3
+    triplet_network = TripletNetTrainer(model, train_datal, val_datal, test_datal,optimizer, margin)
     trainer = pl.Trainer(max_epochs=100, logger=wandb_logger, accumulate_grad_batches=50, callbacks=[checkpoint_callback], devices=3, accelerator='gpu')
     trainer.fit(triplet_network)
     print(checkpoint_callback.best_model_path)

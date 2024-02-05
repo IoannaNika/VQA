@@ -8,18 +8,19 @@ import pytorch_lightning as pl
 import wandb
 from vqa.data.datasets.TripletReads import TripletReads
 from vqa.lightning.TripletNetTrainer import TripletNetTrainer
-from vqa.data.transforms.PadNOneHot import PadNOneHot
-from vqa.models.LSTM import LSTM
-from tcn_lib import TCN
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+from transformers import AutoTokenizer, TrainingArguments, Trainer, AutoModelForSequenceClassification, AutoModelForMaskedLM
+
 
 def main():
     
     tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-50m-multi-species", trust_remote_code=True)
     max_length = tokenizer.model_max_length
+    model = AutoModelForMaskedLM.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-50m-multi-species", trust_remote_code=True)
  
-    data = TripletReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_primers_template_excl_neg_identicals_RSII_100000', transform=transform)
+    data = TripletReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_primers_template_excl_neg_identicals_RSII_100000')
+
     train_count = int(len(data)*0.8)
     val_count = int(len(data)*0.1)
     test_count = len(data) - train_count - val_count
@@ -32,19 +33,12 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=7e-3)
 
     os.environ["WANDB_DIR"] = "/tmp"
-    wandb.init(project="TCN_Siamese_net")
+    wandb.init(project="NT_siamese")
     wandb_logger = WandbLogger()
     # log loss per epoch
     wandb_logger.watch(model, log='all') 
 
-    # save the model every 10 epochs
-    # checkpoint_callbacks = ModelCheckpoint(
-    #     dirpath='checkpoints_triplet_primers_v4/',
-    #     filename='siamese_net-{epoch:02d}',
-    #     every_n_epochs=1
-    # )
-    
-    check_point_dir = "checkpoints_triplet_primers_fixed_max_val_e0.3m0.3/best_rsii_3x9/"
+    check_point_dir = "transformer_checkpoints/"
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=5, verbose=False, mode="min")
     checkpoint_callback = ModelCheckpoint(dirpath=check_point_dir, save_top_k=3, monitor="val_acc", mode="max")
 

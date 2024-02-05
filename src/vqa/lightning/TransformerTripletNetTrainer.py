@@ -8,12 +8,11 @@ import torch.nn as nn
 import numpy as npz
 
 class TripletNetTrainer(pl.LightningModule):
-    def __init__(self, model, train_datal, val_datal, test_datal,optimizer, margin):
+    def __init__(self, model, train_datal, val_datal, test_datal,optimizer):
         super().__init__()
         self.model = model
-        self.margin = margin
+        self.margin = 0.3
         self.criterion = nn.TripletMarginLoss(margin=self.margin, p=2, eps=1e-7)
-        self.tokenizer
         self.optimizer = optimizer
         self.train_datal = train_datal
         self.test_datal = test_datal
