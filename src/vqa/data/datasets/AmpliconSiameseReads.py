@@ -9,7 +9,6 @@ class SiameseReads(Dataset):
         self.directory = directory
         self.transform = transform
         self.genomic_region = genomic_region
-       
         # read tsv
         self.reference_set = pd.read_csv(os.path.join(self.directory, 'lumc_dataset.tsv'), sep='\t', header=0)
         if self.genomic_region != None:
@@ -19,13 +18,37 @@ class SiameseReads(Dataset):
                 self.reference_set = self.reference_set[self.reference_set["start"] == int(start)]
             except:
                 self.reference_set = self.reference_set[self.reference_set["genomic_regions"] == self.genomic_region]
-                
-        
+
         print("Positives: ", len(self.reference_set[self.reference_set["label"] == "positive"]))
         print("Negatives: ", len(self.reference_set[self.reference_set["label"] != "positive"]))
         self.length = len(self.reference_set)
         if self.length > 0:
             print("Accuracy if it predicts all positive: ", len(self.reference_set[self.reference_set["label"] == "positive"])/len(self.reference_set))
+
+        # edit distance to list 
+        self.edit_distances_pos = self.reference_set[self.reference_set["label"] == "positive"]["edit_distance"].to_list()
+        self.edit_distances_neg = self.reference_set[self.reference_set["label"] != "positive"]["edit_distance"].to_list()
+
+        print(self.edit_distances_pos)
+        # save as list  to file that if it exists append to it otherwise create it
+        if os.path.exists("edit_distances_positives.txt"):
+            with open("edit_distances_positives.txt", "a") as f:
+                f.write("\n{}\n".format(self.genomic_region))
+                f.write(str(self.edit_distances_pos))
+        else:
+            with open("edit_distances_positives.txt", "w") as f:
+                f.write("\n{}\n".format(self.genomic_region))
+                f.write(str(self.edit_distances_pos))
+
+        if os.path.exists("edit_distances_negatives.txt"):
+            with open("edit_distances_negatives.txt", "a") as f:
+                f.write("\n{}\n".format(self.genomic_region))
+                f.write(str(self.edit_distances_neg))
+        else:
+            with open("edit_distances_negatives.txt", "w") as f:
+                f.write("\n{}\n".format(self.genomic_region))
+                f.write(str(self.edit_distances_neg))
+
 
     def __getitem__(self, index: int):
 

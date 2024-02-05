@@ -12,6 +12,7 @@ import wandb
 from pytorch_lightning.loggers import WandbLogger
 import os
 import pytorch_lightning as pl
+from tcn_lib import TCN
 from vqa.loss.ContrastiveSiameseLoss import ContrastiveLoss
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -21,6 +22,8 @@ import vqa.models.cluster_embeddings as cluster_embeddings
 
 max_length = 1525
 lstm = LSTM(4,32)
+tcn = TCN(4, -1, [256]*7, 7, batch_norm = True, weight_norm = True)
+
 
 # os.environ["WANDB_DIR"] = "/tmp"
 # wandb.init(project="TCN_Siamese_net")
@@ -37,12 +40,13 @@ genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 
                     (26766, 27872), (27808, 28985), (28699, 29768), (29768, 29790)]
 
 # genomic_regions = [(3166, 4240)]
-checkpoint_path =  "checkpoints_triplet/siamese_net_red.ckpt"
+checkpoint_path =  "checkpoints/epoch=19-step=1600.ckpt"
 checkpoint = torch.load(checkpoint_path)
 
-criterion = ContrastiveLoss(1)
+criterion = ContrastiveLoss(0.3)
 
-model = SiameseNetTrainer.load_from_checkpoint(checkpoint_path, model = lstm, train_datal = None, val_datal = None, test_datal = None, criterion = criterion, optimizer = None, scheduler = None)
+
+model = SiameseNetTrainer.load_from_checkpoint(checkpoint_path, model = tcn, train_datal = None, val_datal = None, test_datal = None, criterion = criterion, optimizer = None, scheduler = None)
 model.eval()
 trainer =  trainer = pl.Trainer(devices=1, accelerator='gpu', enable_progress_bar=False)
 outputs = dict()
@@ -52,13 +56,14 @@ for gr in genomic_regions:
     gr = str(gr[0]) + "_" + str(gr[1])  
     outputs[gr] = []
     labels[gr] = []
-    # data = LUMCClusterReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/", transform=transform, genomic_region = gr)
-    # data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/sars_cov2_BA.2/dataset/", transform=PadNOneHot(max_length,"pre", single_read=True),  genomic_region = gr)
+    # data = LUMCClusterReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/", transform=PadNOneHot(max_length,"pre", single_read=True), genomic_region = gr)
+    # data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/sars_cov2_BA.1.1/dataset/", transform=PadNOneHot(max_length,"pre", single_read=True),  genomic_region = gr)
     # data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform= PadNOneHot(max_length,"pre"), genomic_region=gr)
-    data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/pox_B.1.17/dataset", transform=PadNOneHot(max_length,"pre", single_read=False), genomic_region = gr)
+    data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/test_set_BA.1.1/dataset", transform=PadNOneHot(max_length,"pre", single_read=False), genomic_region = gr)
     print("Genomic region: ", gr, "\n")
     if data.length <= 0:
         continue 
+        
 
     datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
     print("Total amount of data: ", data.length)
@@ -69,7 +74,7 @@ for gr in genomic_regions:
     #         outputs[gr].append(item)
     #     for item in batch[1]:
     #         labels[gr].append(item)
-    # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(outputs[gr], labels[gr], genomic_region=gr, produce_plots=True, eps=1.0, verbose=False)
+    # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(outputs[gr], labels[gr], genomic_region=gr, produce_plots=True, eps=0.3, verbose=False)
     # print("Clusters: ", n_clusters_, " Homogeneity: ", homogeneity, " Completeness: ", completeness)
     
 

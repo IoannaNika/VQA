@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:0 
 
 
-python plot_ed_distribution.py --ref_set /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_test_100000/triplets.tsv --directory /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_test_100000/  --triplet True
+python plot_ed_distribution.py --ref_set /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_primers_template_excl_neg_identicals_RSII_100000/triplets.tsv --directory /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_primers_template_excl_neg_identicals_RSII_100000/  --triplet True

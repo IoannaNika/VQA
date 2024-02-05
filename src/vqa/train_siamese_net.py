@@ -25,7 +25,7 @@ def main():
     max_length = 1525
     # max_length = 29900
 
-    model = LSTM(4, 32)
+    model = LSTM(4, 64)
     # model = TCN(4, -1, [32]*7, 7, batch_norm = True, weight_norm = True)
     # model = TCN(4, -1, [56]*7, 7, batch_norm = True, weight_norm = True)
 
@@ -61,17 +61,17 @@ def main():
 
     # save the model every 10 epochs
     checkpoint_callback = ModelCheckpoint(
-        dirpath='checkpoints_tupled_triplets/',
+        dirpath='checkpoints_triplets_primers/',
         filename='siamese_net-{epoch:02d}',
         every_n_epochs=1
     )
-    early_stop_callback = EarlyStopping(monitor="val_loss", patience=7, verbose=False, mode="min")
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=5, verbose=False, mode="min")
 
     siamese_network = SiameseNetTrainer(model, train_datal, val_datal, test_datal, criterion, optimizer, scheduler)
     trainer = pl.Trainer(max_epochs=100, logger=wandb_logger, accumulate_grad_batches=50, callbacks=[checkpoint_callback, early_stop_callback], devices=1, accelerator='gpu')
     trainer.fit(siamese_network)
     print(checkpoint_callback.best_model_path)
-    trainer.save_checkpoint("checkpoints_tupled_triplets/siamese_net_final.ckpt")
+    trainer.save_checkpoint("checkpoints_triplets_primers/siamese_net_final.ckpt")
     wandb_logger.experiment.unwatch(model)
     trainer.test()
 

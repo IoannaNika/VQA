@@ -43,7 +43,7 @@ def visualize_with_tsne(genomic_region, embeddings, labels, true_labels, perplex
     plt.savefig("true_tsne_" + genomic_region + ".png")
     return 
 
-def cluster_embeddings_dbscan(embeddings, labels, eps=1, min_samples=2, genomic_region = "", produce_plots=True, verbose=True):
+def cluster_embeddings_dbscan(embeddings, labels, eps=1, min_samples=5, genomic_region = "", produce_plots=True, verbose=True):
     """
     Cluster embeddings using DBSCAN from scikit-learn
     :param embeddings: embeddings to cluster

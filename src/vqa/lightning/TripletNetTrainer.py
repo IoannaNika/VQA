@@ -11,7 +11,7 @@ class TripletNetTrainer(pl.LightningModule):
     def __init__(self, model, train_datal, val_datal, test_datal,optimizer):
         super().__init__()
         self.model = model
-        self.margin = 1
+        self.margin = 0.3
         self.criterion = nn.TripletMarginLoss(margin=self.margin, p=2, eps=1e-7)
         self.optimizer = optimizer
         self.train_datal = train_datal
@@ -20,15 +20,15 @@ class TripletNetTrainer(pl.LightningModule):
 
     def forward(self, input1, input2, input3):
         # change second dimension to the last dimension
-        input1 = input1.transpose(1,2)
-        input2 = input2.transpose(1,2)
-        input3 = input3.transpose(1,2)
+        # input1 = input1.transpose(1,2)
+        # input2 = input2.transpose(1,2)
+        # input3 = input3.transpose(1,2)
         output1 = self.model(input1) # hidden dimension only
         output2 = self.model(input2) # hidden dimension only
         output3 = self.model(input3) # hidden dimension only
-        output1 = output1.squeeze(0)
-        output2 = output2.squeeze(0)
-        output3 = output3.squeeze(0)
+        # output1 = output1.squeeze(0)
+        # output2 = output2.squeeze(0)
+        # output3 = output3.squeeze(0)
 
         # Compute the distance between the anchor and the unknown, both of shape (batch size, embedding size)
         return output1, output2, output3
@@ -51,9 +51,11 @@ class TripletNetTrainer(pl.LightningModule):
         loss = self.criterion(output1, output2, output3)
         accuracy = self.get_accuracy(self.margin, output1, output2, output3)
         self.log("val_loss", loss,  batch_size = 20) 
+        self.log("val_acc", accuracy,  batch_size = 20)
+        print("validation accuracy: ", accuracy)
         wandb.log({"epoch": self.current_epoch, "val/loss": loss})
         wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
-        return {"val_loss": loss}
+        return loss
     
 
     def test_step(self, batch, batch_idx):
@@ -61,10 +63,10 @@ class TripletNetTrainer(pl.LightningModule):
         output1, output2, output3 = self.forward(x0, x1, x2)
         # anchor, positive, negative
         loss = self.criterion(output1, output2, output3)
-        self.log("val_loss", loss,  batch_size = 20) 
+        accuracy = self.get_accuracy(self.margin, output1, output2, output3)
         wandb.log({"epoch": self.current_epoch, "val/loss": loss})
         wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
-        return {"val_loss": loss}
+        return loss
       
     def get_accuracy(self, margin, output1, output2, output3):
         euclidean_distance_pos = F.pairwise_distance(output1, output2, keepdim = True) 
