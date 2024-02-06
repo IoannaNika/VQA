@@ -13,18 +13,15 @@ class TripletNetTrainer(pl.LightningModule):
         self.model = model
         self.margin = margin
         self.criterion = nn.TripletMarginLoss(margin=self.margin, p=2, eps=1e-7)
-        self.tokenizer
         self.optimizer = optimizer
         self.train_datal = train_datal
         self.test_datal = test_datal
         self.val_datal = val_datal
 
     def forward(self, input1, input2, input3):
-        # change second dimension to the last dimension
-        output1 = self.model(input1) # hidden dimension only
-        output2 = self.model(input2) # hidden dimension only
-        output3 = self.model(input3) # hidden dimension only
-        # Compute the distance between the anchor and the unknown, both of shape (batch size, embedding size)
+        output1 = self.model(input1) 
+        output2 = self.model(input2) 
+        output3 = self.model(input3) 
         return output1, output2, output3
 
   
