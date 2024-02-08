@@ -14,8 +14,8 @@ class TripletNetTrainer(pl.LightningModule):
         self.model = model
         self.margin = margin
         self.criterion = nn.TripletMarginLoss(margin=self.margin, p=2, eps=1e-7)
-        self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-50m-multi-species", trust_remote_code=True)
-        self.max_length = 1500 # self.tokenizer.model_max_length
+        self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-100m-multi-species", trust_remote_code=True)
+        self.max_length = 500 # self.tokenizer.model_max_length
         self.optimizer = optimizer
         self.train_datal = train_datal
         self.test_datal = test_datal

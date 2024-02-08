@@ -3,6 +3,7 @@ import torch.optim as optim
 import torch
 import wandb
 import vqa.models.cluster_embeddings as cluster_embeddings
+import vqa.loss.TripletLoss as TripletLoss
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as npz
