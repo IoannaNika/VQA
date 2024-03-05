@@ -48,7 +48,7 @@ criterion = ContrastiveLoss(0.3)
 
 model = SiameseNetTrainer.load_from_checkpoint(checkpoint_path, model = tcn, train_datal = None, val_datal = None, test_datal = None, criterion = criterion, optimizer = None, scheduler = None)
 model.eval()
-trainer =  trainer = pl.Trainer(devices=1, accelerator='gpu', enable_progress_bar=False)
+trainer = pl.Trainer(devices=1, accelerator='gpu', enable_progress_bar=False)
 outputs = dict()
 labels = dict()
 
@@ -58,8 +58,8 @@ for gr in genomic_regions:
     labels[gr] = []
     # data = LUMCClusterReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/", transform=PadNOneHot(max_length,"pre", single_read=True), genomic_region = gr)
     # data = AmpliconClusterReads(directory="/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/sars_cov2_BA.1.1/dataset/", transform=PadNOneHot(max_length,"pre", single_read=True),  genomic_region = gr)
-    # data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform= PadNOneHot(max_length,"pre"), genomic_region=gr)
-    data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/test_set_BA.1.1/dataset", transform=PadNOneHot(max_length,"pre", single_read=False), genomic_region = gr)
+    data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform= PadNOneHot(max_length,"pre"), genomic_region=gr)
+    # data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/test_datasets/test_set_BA.1.1/dataset", transform=PadNOneHot(max_length,"pre", single_read=False), genomic_region = gr)
     print("Genomic region: ", gr, "\n")
     if data.length <= 0:
         continue 
@@ -77,6 +77,11 @@ for gr in genomic_regions:
     # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(outputs[gr], labels[gr], genomic_region=gr, produce_plots=True, eps=0.3, verbose=False)
     # print("Clusters: ", n_clusters_, " Homogeneity: ", homogeneity, " Completeness: ", completeness)
     
+
+print("Evaluate all data ...")
+data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data", transform=PadNOneHot(max_length,"pre", single_read=False))
+datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
+out =  trainer.test(model, dataloaders = datal)
 
 # model.eval()
 # # predict with the model

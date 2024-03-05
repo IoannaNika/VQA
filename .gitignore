@@ -17,6 +17,7 @@ lightning_logs/
 # data
 MNIST
 src/vqa/data/data/
+data/edit_dist/*
 
 
 
@@ -31,3 +32,10 @@ src/vqa/data/__MACOSX/*
 *.ckpt
 *.out
 */init_clusters.sh
+*.png
+
+*/checkpoint_binary_transformer/*
+*.txt
+src/vqa/.cache/*
+src/vqa/cache/*
+src/vqa/checkpoint_binary_transformer/

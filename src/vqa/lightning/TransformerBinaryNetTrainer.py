@@ -8,51 +8,63 @@ import torch.nn as nn
 import numpy as npz
 from transformers import AutoTokenizer
 
+
+
+
 class TransformerBinaryNetTrainer(pl.LightningModule):
-    def __init__(self, model, train_datal, val_datal, test_datal,optimizer, batch_size):
+    def __init__(self, model, train_datal, val_datal, test_datal, optimizer, batch_size, checkpoint_dir, max_length=800, device="cpu"):
         super().__init__()
         self.model = model
-        # replace head with a binary classification head
-        self.model.classifier = nn.Linear(self.model.config.hidden_size, 2)
-        self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-100m-multi-species", trust_remote_code=True)
-        # add | as a special token to the tokenizer
-        self.tokenizer.add_tokens("|")
+        self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", trust_remote_code=True)
         self.batch_size = batch_size
-        self.max_length = 500 # self.tokenizer.model_max_length
+        self.max_length = max_length # self.tokenizer.model_max_length
         self.optimizer = optimizer
         self.train_datal = train_datal
         self.test_datal = test_datal
         self.val_datal = val_datal
+        self.criterion = nn.CrossEntropyLoss()
+        self.device = device
+        self.checkpoint_dir = checkpoint_dir
 
     def forward(self, input1, input2):
 
-        # merge input1 and input2 into one tensor and add a special token in between them 
-        inpt = input1 + "|" + input2
+        inpt = []
 
-        inpt = self.tokenizer.batch_encode_plus(inpt, return_tensors="pt", padding="max_length", max_length = self.max_length)["input_ids"].to("cuda:0")
+        for i in range(len(input1)):
+            inpt.append(input1[i].strip() + "<mask><mask><mask><mask><mask><mask><mask><mask><mask><mask><mask><mask><mask><mask>" + input2[i].strip())
 
-        output = self.get_binary_output(inpt)
-        # print("Output 1: ", output1.shape)
-        return output
+        inpt = self.tokenizer.batch_encode_plus(inpt, return_tensors="pt", padding="max_length", max_length = self.max_length, truncation=True)["input_ids"].to(self.device)
+        
+        attention_mask = inpt != self.tokenizer.pad_token_id
+        
+        output = self.model(inpt,
+            attention_mask=attention_mask,
+            # encoder_attention_mask=attention_mask,
+            output_hidden_states=True)
+
+        return  output.logits
+   
 
   
     def training_step(self, batch, batch_idx):
         (x0, x1), y = batch
         output = self.forward(x0, x1)
-        # anchor, positive, negative
-        loss = F.cross_entropy(output, y)
+        loss = self.criterion(output, y)
         accuracy = torch.sum(torch.argmax(output, dim=1) == y).item() / len(y)
         wandb.log({"epoch": self.current_epoch, "train/loss": loss})
         wandb.log({"epoch": self.current_epoch, "train/accuracy": accuracy})
         return loss
 
     def validation_step(self, batch, batch_idx):
+        self.model.save_pretrained("{}/{}".format(self.checkpoint_dir, self.current_epoch))
         (x0, x1), y = batch
+        # y = torch.Tensor(y)
+        # print("Y: ", y)
         output = self.forward(x0, x1)
-        loss = F.cross_entropy(output, y)
+        loss = self.criterion(output, y)
         accuracy = torch.sum(torch.argmax(output, dim=1) == y).item() / len(y)
-        self.log("val_loss", loss,  batch_size = 20) 
-        self.log("val_acc", accuracy,  batch_size = 20)
+        self.log("val_loss", loss,  batch_size = self.batch_size) 
+        self.log("val_acc", accuracy,  batch_size = self.batch_size)
         print("validation accuracy: ", accuracy)
         wandb.log({"epoch": self.current_epoch, "val/loss": loss})
         wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
@@ -62,16 +74,10 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         (x0, x1), y = batch
         output = self.forward(x0, x1)
-        loss = F.cross_entropy(output, y)
+        loss = self.criterion(output, y)
         accuracy = torch.sum(torch.argmax(output, dim=1) == y).item() / len(y)
-        wandb.log({"epoch": self.current_epoch, "val/loss": loss})
-        wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
+        self.log("val_acc", accuracy,  batch_size = self.batch_size)
         return loss
-
-    def get_binary_output(self, inpt):
-        # get probabilities of the two classes
-        output = self.model(inpt).logits
-        return  output
  
     def configure_optimizers(self):
         return self.optimizer
@@ -84,4 +90,7 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
     
     def val_dataloader(self):
         return self.val_datal
+
+    def device(self): 
+        return self.device
     

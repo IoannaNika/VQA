@@ -18,11 +18,11 @@ class SiameseReads(Dataset):
         if self.genomic_region != None:
             self.reference_set = self.reference_set[self.reference_set["genomic_region"] == self.genomic_region]
         
-        print("Positives: ", len(self.reference_set[self.reference_set["label"] == "positive"]))
-        print("Negatives: ", len(self.reference_set[self.reference_set["label"] != "positive"]))
+        # print("Positives: ", len(self.reference_set[self.reference_set["label"] == "positive"]))
+        # print("Negatives: ", len(self.reference_set[self.reference_set["label"] != "positive"]))
         self.length = len(self.reference_set)
-        if self.length > 0:
-            print("Accuracy if it predicts all positive: ", len(self.reference_set[self.reference_set["label"] == "positive"])/len(self.reference_set))
+        # if self.length > 0:
+        #     print("Accuracy if it predicts all positive: ", len(self.reference_set[self.reference_set["label"] == "positive"])/len(self.reference_set))
 
 
     def __getitem__(self, index: int):
@@ -47,7 +47,7 @@ class SiameseReads(Dataset):
 
         data = (fasta_1, fasta_2)
         ed = editdistance.eval(fasta_1, fasta_2)
-        print("data info: ", ed, target)
+        # print("data info: ", ed, target)
 
         if self.transform:
             data = self.transform(data)
