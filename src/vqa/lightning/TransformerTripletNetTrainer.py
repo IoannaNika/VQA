@@ -17,7 +17,7 @@ class TripletNetTrainer(pl.LightningModule):
         if criterion == None: 
             criterion=nn.TripletMarginLoss(margin=self.margin, p=2, eps=1e-7)
         self.criterion =criterion
-        self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
+        self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-50m-multi-species", trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
         self.max_length = 400 
         self.optimizer = optimizer
         self.train_datal = train_datal

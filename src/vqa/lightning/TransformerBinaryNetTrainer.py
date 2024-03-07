@@ -25,6 +25,12 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
         self.criterion = nn.CrossEntropyLoss()
         self.device = device
         self.checkpoint_dir = checkpoint_dir
+        self.predictions_file_name = "predictions.tsv"
+
+        # open file to write the predictions
+        self.file = open(self.predictions_file_name, 'w')
+        self.file.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
+
 
     def forward(self, input1, input2):
 
@@ -72,11 +78,15 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
     
 
     def test_step(self, batch, batch_idx):
-        (x0, x1), y = batch
+        (read_id_1,read_id_2), (x0, x1), y, gr = batch
         output = self.forward(x0, x1)
         loss = self.criterion(output, y)
         accuracy = torch.sum(torch.argmax(output, dim=1) == y).item() / len(y)
         self.log("val_acc", accuracy,  batch_size = self.batch_size)
+        # write in file the pair the prediction and the true label
+        for i in range(len(y)):
+            print("Y: ", y)
+            self.file.write(gr[i] + "\t" + read_id_1[i] + "\t" + x0[i] + "\t" + read_id_2[i] + "\t" + x1[i] + "\t" + str(torch.argmax(output[i]).item()) + "\t" + str(torch.max(F.softmax(output[i]), dim=0).values.item()) + "\t" + str(y[i].item()) + "\n")  
         return loss
  
     def configure_optimizers(self):

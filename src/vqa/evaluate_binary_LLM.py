@@ -14,9 +14,9 @@ from transformers import TrainingArguments, Trainer, AutoModelForSequenceClassif
 from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
 from peft import LoraConfig, get_peft_model, TaskType, IA3Config
 from torchsummary import summary
-from vqa.models.CustomBinaryTransformer import CustomBinaryTransformer
 from peft import PeftConfig, PeftModel
 from vqa.data.datasets.SimulatedAmpliconSiameseReads import SiameseReads
+
 
 nt = AutoModelForSequenceClassification.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", num_labels =2,  trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
 adapter_name =  "checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_long/4" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m/1" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query/6"
@@ -45,34 +45,20 @@ trainer = pl.Trainer(devices=1, accelerator='gpu', enable_progress_bar=False)
 # HCV-1b
 genomic_regions = [(72, 1065), (985, 1946), (1842, 2800), (2703, 3698), (3495, 4459), (4314, 5279), (5215, 6167), (6068, 7008), (6930, 7899), (7740, 8681), (8300, 9280)]
 
-for gr in genomic_regions:
-    gr = str(gr[0]) + "_" + str(gr[1])  
-    data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/HCV-1b-NCBI/subselection_95/dataset", genomic_region = gr)
-    # data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data",  genomic_region = gr)
-    datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
-    print("Genomic region: ", gr, "\n")
-    if data.length <= 0:
-        continue 
+# for gr in genomic_regions:
+#     gr = str(gr[0]) + "_" + str(gr[1])  
+#     data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/HCV-1b-NCBI/subselection_95/dataset/test_pairs.tsv", genomic_region = gr, test_mode=True)
+#     # data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data",  genomic_region = gr)
+#     datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
+#     print("Genomic region: ", gr, "\n")
+#     if data.length <= 0:
+#         continue 
         
-    print("Total amount of data: ", data.length)
-    out =  trainer.test(model, dataloaders = datal)
-
-    # outputs = dict()
-    # labels = dict()
-
-    for batch in out:
-        print(batch)
-        # for item in batch[0]:
-        #     outputs[gr].append(item)
-        # for item in batch[1]:
-        #     labels[gr].append(item)
-    # predicted_labels , n_clusters_, homogeneity, completeness  = cluster_embeddings.cluster_embeddings_dbscan(outputs[gr], labels[gr], genomic_region=gr, produce_plots=True, eps=0.3, verbose=False)
-    # print("Clusters: ", n_clusters_, " Homogeneity: ", homogeneity, " Completeness: ", completeness)
-    # print(outputs)
-    # print(labels)
+#     print("Total amount of data: ", data.length)
+#     out =  trainer.test(model, dataloaders = datal)
 
 print("Evaluate all data ...")
 # data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data")
-data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/HCV-1b-NCBI/subselection_95/dataset")
+data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/HCV-1b-NCBI/subselection_95/dataset", test_mode=True)
 datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
 out =  trainer.test(model, dataloaders = datal)

@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH --partition=general # Request partition. Default is 'general' 
+#SBATCH --partition=general,insy # Request partition. Default is 'general' 
 #SBATCH --qos=short         # Request Quality of Service. Default is 'short' (maximum run time: 4 hours)
 #SBATCH --time=03:00:00      # Request run time (wall-clock). Default is 1 minute
 #SBATCH --ntasks=1          # Request number of parallel tasks per job. Default is 1

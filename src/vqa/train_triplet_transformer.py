@@ -16,7 +16,7 @@ from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
 
 
 def main():
-    model = AutoModelForMaskedLM.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
+    model = AutoModelForMaskedLM.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-50m-multi-species", trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
     
     data = TripletReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/triplet_dataset_primers_template_excl_neg_identicals_327896')
 
@@ -24,13 +24,13 @@ def main():
     val_count = int(len(data)*0.1)
     test_count = len(data) - train_count - val_count
 
-    # peft_config = IA3Config(
-    # peft_type="IA3", target_modules=["value", "key", "intermediate.dense", "output.dense"], feedforward_modules=["intermediate.dense", "output.dense"])
+    peft_config = IA3Config(
+    peft_type="IA3", target_modules=["value", "key", "intermediate.dense", "output.dense"], feedforward_modules=["intermediate.dense", "output.dense"])
     
-    # model = get_peft_model(model, peft_config)
+    model = get_peft_model(model, peft_config)
 
-    for name, param in model.named_parameters():
-        param.requires_grad = True
+    # for name, param in model.named_parameters():
+    #     param.requires_grad = True
 
 
     train_data, val_data, test_data = random_split(data, [train_count, val_count, test_count])
@@ -54,12 +54,12 @@ def main():
     # log loss per epoch
     wandb_logger.watch(model) 
 
-    check_point_dir = "checkpoint_triplet_transformer/full_fine_tuning_more_data_500"
+    check_point_dir = "checkpoint_triplet_transformer/PEFT_more_data_50m_32h/"
     early_stop_callback = EarlyStopping(monitor="val_acc", patience=3, verbose=False, mode="max")
     checkpoint_callback = ModelCheckpoint(dirpath=check_point_dir, save_top_k=3, monitor="val_acc", mode="max")
     margin = 0.2
     triplet_network = TripletNetTrainer(model, train_datal, val_datal, test_datal,optimizer, margin)
-    trainer = pl.Trainer(max_epochs=100, logger = wandb_logger, accumulate_grad_batches=333, strategy='ddp_find_unused_parameters_true', callbacks=[checkpoint_callback, early_stop_callback], devices=3, accelerator='gpu', deterministic = True,  enable_progress_bar=False)
+    trainer = pl.Trainer(max_epochs=100, logger = wandb_logger, accumulate_grad_batches=333, strategy='ddp_find_unused_parameters_true', callbacks=[checkpoint_callback, early_stop_callback], devices=1, accelerator='gpu', deterministic = True,  enable_progress_bar=False)
     trainer.fit(triplet_network)
     trainer.save_checkpoint(check_point_dir + "/triplet_network_final.ckpt")
     wandb_logger.experiment.unwatch(model)
