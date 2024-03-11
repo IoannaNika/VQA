@@ -10,7 +10,6 @@ from transformers import AutoTokenizer
 
 
 
-
 class TransformerBinaryNetTrainer(pl.LightningModule):
     def __init__(self, model, train_datal, val_datal, test_datal, optimizer, batch_size, checkpoint_dir, max_length=800, device="cpu"):
         super().__init__()
@@ -33,7 +32,6 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
 
 
     def forward(self, input1, input2):
-
         inpt = []
 
         for i in range(len(input1)):

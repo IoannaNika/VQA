@@ -61,11 +61,11 @@ def create_consensus(community, genomic_region, results):
     print("Mafft alignment done.")
     alignment = AlignIO.read("temp_output.fasta", "fasta")  
     summary_align = AlignInfo.SummaryInfo(alignment)
-    consensus = summary_align.dumb_consensus(ambiguous='N', threshold=0)
+    consensus = summary_align.gap_consensus(ambiguous='N', threshold=0.5)
     # to upper case
     consensus = consensus.upper()
     # # get string representation of the consensus
-    consensus = str(consensus)
+    consensus = str(consensus).replace("-", "")
     return consensus
 
 def get_results_per_community_and_genomic_region(community, genomic_region, results):

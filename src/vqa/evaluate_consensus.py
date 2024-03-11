@@ -1,7 +1,6 @@
 import argparse
 import sys
 import pandas as pd
-import editdistance
 import os
 import Levenshtein
 

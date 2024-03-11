@@ -13,7 +13,7 @@ class SiameseReads(Dataset):
         self.test_mode = test_mode
        
         # read tsv file
-        self.reference_set = pd.read_csv(self.directory + "/test_pairs.tsv", sep='\t', header=0)
+        self.reference_set = pd.read_csv(self.directory + "/all_test_pairs.tsv", sep='\t', header=0)
         # self.reference_set = self.reference_set[self.reference_set["label"] != "positive"]
         # print(self.reference_set)
         if self.genomic_region != None:
