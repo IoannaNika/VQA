@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 
 
 class TransformerBinaryNetTrainer(pl.LightningModule):
-    def __init__(self, model, train_datal, val_datal, test_datal, optimizer, batch_size, checkpoint_dir, max_length=800, device="cpu"):
+    def __init__(self, model, train_datal, val_datal, test_datal, optimizer, batch_size, checkpoint_dir, outdir, max_length=800, device="cpu"):
         super().__init__()
         self.model = model
         self.tokenizer = AutoTokenizer.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", trust_remote_code=True)
@@ -24,12 +24,13 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
         self.criterion = nn.CrossEntropyLoss()
         self.device = device
         self.checkpoint_dir = checkpoint_dir
-        self.predictions_file_name = "predictions.tsv"
+        self.predictions_file_name = outdir 
 
-        # open file to write the predictions
-        self.file = open(self.predictions_file_name, 'w')
-        self.file.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
-
+        # if self.predictions_file_name != None: 
+        #     # open file to write the predictions
+        #     self.file = open(self.predictions_file_name, 'w')
+        #     # self.file.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
+        #     self.
 
     def forward(self, input1, input2):
         inpt = []
@@ -48,8 +49,6 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
 
         return  output.logits
    
-
-  
     def training_step(self, batch, batch_idx):
         (x0, x1), y = batch
         output = self.forward(x0, x1)
@@ -74,6 +73,18 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
         wandb.log({"epoch": self.current_epoch, "val/accuracy": accuracy})
         return loss
     
+    # def test_step(self, batch, batch_idx):
+    #     (x0, x1), y = batch
+    #     # y = torch.Tensor(y)
+    #     # print("Y: ", y)
+    #     output = self.forward(x0, x1)
+    #     loss = self.criterion(output, y)
+    #     accuracy = torch.sum(torch.argmax(output, dim=1) == y).item() / len(y)
+    #     print("test accuracy: ", accuracy)
+    #     wandb.log({"epoch": self.current_epoch, "test/loss": loss})
+    #     wandb.log({"epoch": self.current_epoch, "test/accuracy": accuracy})
+    #     return loss
+    
 
     def test_step(self, batch, batch_idx):
         (read_id_1,read_id_2), (x0, x1), y, gr = batch
@@ -83,8 +94,10 @@ class TransformerBinaryNetTrainer(pl.LightningModule):
         self.log("val_acc", accuracy,  batch_size = self.batch_size)
         # write in file the pair the prediction and the true label
         for i in range(len(y)):
-            print("Y: ", y)
-            self.file.write(gr[i] + "\t" + read_id_1[i] + "\t" + x0[i] + "\t" + read_id_2[i] + "\t" + x1[i] + "\t" + str(torch.argmax(output[i]).item()) + "\t" + str(torch.max(F.softmax(output[i]), dim=0).values.item()) + "\t" + str(y[i].item()) + "\n")  
+            # print("Y: ", y)
+            file = open(self.predictions_file_name, 'a')
+            file.write(gr[i] + "\t" + read_id_1[i] + "\t" + x0[i] + "\t" + read_id_2[i] + "\t" + x1[i] + "\t" + str(torch.argmax(output[i]).item()) + "\t" + str(torch.max(F.softmax(output[i]), dim=0).values.item()) + "\t" + str(y[i].item()) + "\n") 
+            file.close()
         return loss
  
     def configure_optimizers(self):

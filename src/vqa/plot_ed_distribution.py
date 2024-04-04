@@ -12,8 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument('--ref_set', dest = 'ref_set', required=True, type=str, help="tsv file with data")
     parser.add_argument('--directory', dest = 'directory', required=True, type=str, help="read directory")
-    parser.add_argument('--triplet', dest = 'triplet', required=True, type=bool, help="triplet dataset or not")
-    
+    parser.add_argument('--triplet', dest = 'triplet', required=False, default=False, type=bool, help="triplet dataset or not")
     args = parser.parse_args()
 
     reference_set = pd.read_csv(args.ref_set, sep='\t', header=0)
@@ -23,7 +22,7 @@ def main():
     neg = []
 
     for index in range(len(reference_set)):
-        print(index)
+        print(index, args.triplet)
 
         items = reference_set.iloc[index]
 
@@ -50,27 +49,30 @@ def main():
                 pos.append(ed)
             else:
                 neg.append(ed)
+
         else: 
-
-            read_path_anch = os.path.join(args.directory, "reads", items["read_anch"] + ".fasta")
-            read_path_pos = os.path.join(args.directory, "reads", items["read_pos"] + ".fasta")
-            read_path_neg = os.path.join(args.directory, "reads", items["read_neg"] + ".fasta")
-
-
-            with open(read_path_anch, 'r') as read_f:
-                read_anch = read_f.readlines()[1].strip()
-
-            with open(read_path_pos, 'r') as read_f:
-                read_pos = read_f.readlines()[1].strip()
             
-            with open(read_path_neg, 'r') as read_f:
-                read_neg = read_f.readlines()[1].strip()
+            if args.triplet == True: 
 
-            ed_pos = editdistance.eval(read_anch, read_pos)
-            ed_neg = editdistance.eval(read_anch, read_neg)
+                read_path_anch = os.path.join(args.directory, "reads", items["read_anch"] + ".fasta")
+                read_path_pos = os.path.join(args.directory, "reads", items["read_pos"] + ".fasta")
+                read_path_neg = os.path.join(args.directory, "reads", items["read_neg"] + ".fasta")
 
-            pos.append(ed_pos)
-            neg.append(ed_neg)
+
+                with open(read_path_anch, 'r') as read_f:
+                    read_anch = read_f.readlines()[1].strip()
+
+                with open(read_path_pos, 'r') as read_f:
+                    read_pos = read_f.readlines()[1].strip()
+                
+                with open(read_path_neg, 'r') as read_f:
+                    read_neg = read_f.readlines()[1].strip()
+
+                ed_pos = editdistance.eval(read_anch, read_pos)
+                ed_neg = editdistance.eval(read_anch, read_neg)
+
+                pos.append(ed_pos)
+                neg.append(ed_neg)
 
     print(len(pos), len(neg))
 

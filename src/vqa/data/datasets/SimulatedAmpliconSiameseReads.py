@@ -13,11 +13,19 @@ class SiameseReads(Dataset):
         self.test_mode = test_mode
        
         # read tsv file
-        self.reference_set = pd.read_csv(self.directory + "/all_test_pairs.tsv", sep='\t', header=0)
+        if self.test_mode == False:
+            self.reference_set = pd.read_csv(self.directory + "/samples.tsv", sep='\t', header=0)
+        else:
+            self.reference_set = pd.read_csv(self.directory + "/all_test_pairs.tsv", sep='\t', header=0)
+
         # self.reference_set = self.reference_set[self.reference_set["label"] != "positive"]
         # print(self.reference_set)
         if self.genomic_region != None:
-            self.reference_set = self.reference_set[self.reference_set["genomic_region"] == self.genomic_region]
+            try: 
+                self.reference_set = self.reference_set[self.reference_set["genomic_region"] == self.genomic_region]
+            except: 
+                self.reference_set = self.reference_set[(self.reference_set["start"] == self.genomic_region[0]) &  (self.reference_set["end"] == self.genomic_region[1])]
+
         
         # print("Positives: ", len(self.reference_set[self.reference_set["label"] == "positive"]))
         # print("Negatives: ", len(self.reference_set[self.reference_set["label"] != "positive"]))
@@ -29,8 +37,12 @@ class SiameseReads(Dataset):
     def __getitem__(self, index: int):
 
         items = self.reference_set.iloc[index]
-        read_id_1 = items["read_1"]
-        read_id_2 = items["read_2"]
+        try: 
+            read_id_1 = items["read_1"]
+            read_id_2 = items["read_2"]
+        except: 
+            read_id_1 = items["id1"]
+            read_id_2 = items["id2"]
 
         label = items["label"]
         
@@ -48,16 +60,16 @@ class SiameseReads(Dataset):
 
         data = (fasta_1, fasta_2)
 
-        # ed = editdistance.eval(fasta_1, fasta_2)
-        # print("data info: ", ed, target)
-
         if self.transform:
             data = self.transform(data)
         
         if self.test_mode: 
             ids = (read_id_1, read_id_2)
             data = (fasta_1, fasta_2)
-            gr = items["genomic_region"]
+            try: 
+                gr = items["genomic_region"]
+            except: 
+                gr = str(items["start"]) + "_" + str(items["end"])
             return  ids, data, target, gr
 
         return data, target

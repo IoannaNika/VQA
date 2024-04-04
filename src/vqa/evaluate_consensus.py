@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import os
 import Levenshtein
+import editdistance
 
 
 def read_ground_truth(gt_dir, sequence_id, genomic_region):
@@ -12,7 +13,7 @@ def read_ground_truth(gt_dir, sequence_id, genomic_region):
     with open(gt_file, "r") as file:
         lines = file.readlines()
 
-    id_to_be_found = ">" + sequence_id + ":" + genomic_region + ":0"
+    id_to_be_found = ">+_" + sequence_id + ":" + genomic_region + ":0"
 
     # find the line with the sequence
     for i in range(len(lines)):
@@ -26,7 +27,7 @@ def create_output_file(output_file_name):
     
     # open file to write the consensus
     file = open(output_file_name, "w")
-    file.write("Genomic_region" + "\t" + "Sequence_id" + "\t" + "Levenshtein_ratio" + "\t" + "Levenshtein_distance" +"\t" + "Consensus" + "\t" + "Ground_truth" + "\n")
+    file.write("Genomic_region" + "\t" + "Sequence_id" + "\t" + "Levenshtein_ratio" + "\t" + "Edit_distance" +"\t" + "Consensus" + "\t" + "Ground_truth" + "\n")
     return file
 
 def main():
@@ -49,7 +50,8 @@ def main():
         gt_sequence = read_ground_truth(args.gt_dir, sequence_id, genomic_region)
         # calculate edit distance
         l_ratio = Levenshtein.ratio(consensus, gt_sequence)
-        l_distance = Levenshtein.distance(consensus, gt_sequence)
+        l_distance = editdistance.eval(consensus, gt_sequence)
+
         
         file.write(genomic_region + "\t" + sequence_id + "\t" + str(l_ratio) + "\t" +  str(l_distance)  + "\t" + consensus + "\t" + gt_sequence + "\n")
     

@@ -8,6 +8,8 @@ from Bio import AlignIO
 from Bio.Align import AlignInfo
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+import sys
+import editdistance
 
 
 def make_output_file(output_file_name):
@@ -16,7 +18,8 @@ def make_output_file(output_file_name):
     
     # open file to write the consensus
     file = open(output_file_name, "w")
-    file.write("Community" + "\t" + "Genomic_region" + "\t" + "Consensus" + "\t" + "Sequence_id" + "\n")
+    file.write("Community" + "\t" + "Genomic_region" + "\t" + "Consensus" + "\t" + "Sequence_id" + "\t" + "Nreads" + "\t" + "Relative_abundance" + "\n")
+    file.close()
     return file
 
 def clean_temp_files():
@@ -73,6 +76,25 @@ def get_results_per_community_and_genomic_region(community, genomic_region, resu
     results_per_community_and_gr = results_per_community[results_per_community["Genomic_regions"] == genomic_region]
     return results_per_community_and_gr
 
+def check_and_act_if_consensus_exists(output, genomic_region, consensus, results_per_community_and_gr, results):
+    # if the consensus exists already in the output file then simply add the abundance of this consensus to the existing one
+    # iterate through the output file and check if the consensus exists for this genomic region
+    # if it exists then add the abundance of this consensus to the existing one
+    # if it does not exist then write the new consensus to the output file
+    output_file = pd.read_csv(output, sep='\t', header=0)
+    output_file_gr = output_file[output_file["Genomic_region"] == genomic_region]
+    for consensus_in_output in output_file_gr["Consensus"]:
+        if editdistance.eval(consensus_in_output, consensus) == 0:
+            # get the number of sequences for this consensus
+            number_of_sequences = len(results_per_community_and_gr)
+            relative_abundance = number_of_sequences / len(results[results["Genomic_regions"] == genomic_region])
+            # add the relative abundance to the existing one                    
+            output_file.loc[(output_file["Consensus"] == consensus )& (output_file["Genomic_region"] == genomic_region), "Relative_abundance"] += relative_abundance
+            output_file.to_csv(output, sep='\t', index=False)
+            return True  
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="Create consensus")
     parser.add_argument('--communities', dest = 'results', required=True, type=str, help="tsv file with communities")
@@ -96,16 +118,23 @@ def main():
             consensus = create_consensus(community, genomic_region, results)
             community = str(community)
             results_per_community_and_gr = get_results_per_community_and_genomic_region(community, genomic_region, results)
+
+            if check_and_act_if_consensus_exists(output, genomic_region, consensus, results_per_community_and_gr, results):
+                continue
+            
             try: 
                 sequence_ids = results_per_community_and_gr["Sequence_id"].tolist()
-                print(sequence_ids)
                 final_sequence_ids = [ seq_id.split("_")[0] for seq_id in sequence_ids]
                 # get the most frequent sequence id
                 sequence_id = max(set(final_sequence_ids), key=final_sequence_ids.count)
                 # write to file
             except:
                 sequence_id = "NA"
-            file.write(community + "\t" + genomic_region + "\t" + consensus + "\t" + sequence_id + "\n")
+            number_of_sequences = len(results_per_community_and_gr)
+            relative_abundance = number_of_sequences / len(results[results["Genomic_regions"] == genomic_region])
+            if number_of_sequences >= 3: 
+                with open(output, "a") as file:
+                    file.write(community + "\t" + genomic_region + "\t" + consensus + "\t" + sequence_id + "\t" + str(number_of_sequences) + "\t" + str(relative_abundance) + "\n")
         
     
     file.close()

@@ -19,10 +19,10 @@ from vqa.data.datasets.SimulatedAmpliconSiameseReads import SiameseReads
 
 
 nt = AutoModelForSequenceClassification.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", num_labels =2,  trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
-adapter_name =  "checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_long/4" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m/1" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query/6"
+adapter_name = "checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_168h/11" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_long/4" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m/1" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query/6"
 
-model = PeftModel.from_pretrained(nt, adapter_name)
-model = model.merge_and_unload()
+# model = PeftModel.from_pretrained(nt, adapter_name)
+# model = model.merge_and_unload()
 
 model = TransformerBinaryNetTrainer(model = nt, train_datal = None, val_datal = None, test_datal = None,optimizer = None, batch_size = 20, checkpoint_dir=None,  device="cuda:0")
 
@@ -58,7 +58,7 @@ genomic_regions = [(72, 1065), (985, 1946), (1842, 2800), (2703, 3698), (3495, 4
 #     out =  trainer.test(model, dataloaders = datal)
 
 print("Evaluate all data ...")
-# data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data")
-data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/HCV-1b-NCBI/subselection_95/dataset", test_mode=True)
+# data = LUMCReads(directory= "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data/lumc/dataset", test_mode=True)
+data = SiameseReads(directory = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data/HCV-1b/95/cov_100x_mixture_pb_hifi/dataset", test_mode=True)
 datal = DataLoader(data, batch_size = 20, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=8)
 out =  trainer.test(model, dataloaders = datal)

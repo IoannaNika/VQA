@@ -39,3 +39,11 @@ src/vqa/data/__MACOSX/*
 src/vqa/.cache/*
 src/vqa/cache/*
 src/vqa/checkpoint_binary_transformer/
+*.tsv
+src/vqa/neg
+src/vqa/pos
+src/vqa/slurms/*
+src/vqa/*.pkl
+src/vqa/*.err
+src/vqa/Experiments/*
+src/vqa/checkpoint_binary_transformer_rev_compl/*

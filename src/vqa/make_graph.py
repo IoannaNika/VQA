@@ -43,7 +43,11 @@ def find_number_of_vertices(results):
 
 def find_number_of_actual_communities_NCBI(results):
     sequence_ids = get_sequence_ids(results)
-    n_communities =  [seq_id.split("_")[0] for seq_id in sequence_ids]
+    try:
+        n_communities =  [seq_id.split("_")[0] for seq_id in sequence_ids]
+    except: 
+        print(sequence_ids)
+        raise Exception
     n_communities = len(set(n_communities))
     print("Actual number of communities: ", n_communities)
     return n_communities
@@ -127,6 +131,7 @@ def get_true_labels_and_predicted_labels_NCBI(predicted_communities, vertex_to_s
         predicted_labels.extend(predicted_community_labels)
     return true_labels, predicted_labels
 
+
 def write_predicted_communities_to_file(predicted_communities, vertex_to_sequence_id, genomic_region, output_file, results):
     for i in range(len(predicted_communities)):
         community = predicted_communities[i]
@@ -172,8 +177,6 @@ def main():
 
         # find the actual number of communities
         n_communities = find_number_of_actual_communities_NCBI(results__per_gr)
-        print("Number of true communities: ", n_communities)
-
         # create a mapping from sequence ids to vertex indices
         sequence_id_to_vertex, vertex_to_sequence_id = create_mappings_from_sequence_id_to_vertex_and_back(n, results__per_gr)
 
@@ -187,10 +190,11 @@ def main():
             os.makedirs(folder_path)
 
         # visualize the true graph
-        ig.plot(g_true, folder_path + "graph_true.png", vertex_size=10, vertex_color="blue", edge_width=3, edge_color="black")
+        ig.plot(g_true, folder_path + "graph_true.png", vertex_size=10, vertex_color="blue", edge_width=0.3, edge_color="black")
 
         # apply community detection
-        predicted_communities = g.community_multilevel(weights="weight")
+        # predicted_communities = g.community_multilevel(weights="weight")
+        predicted_communities = g.community_leiden(weights = "weight", objective_function = "modularity", resolution = 0.75)
         print("Number of communities: ", len(predicted_communities))
 
         # define colors for each community in the graph
@@ -200,11 +204,12 @@ def main():
         # assign the labels to the vertices
         g.vs["label"] = [vertex_to_sequence_id[i].split("_")[0] for i in range(n)]
         # visualize the graph with the communities with labels, and position the labels next to the vertices, not in the middle of the vertices 
-        ig.plot(g, folder_path + "graph_predicted.png", vertex_size=10, vertex_color=g.vs["color"], edge_width=3, edge_color="black", vertex_label_dist=2, vertex_label_size=12, margin=50, rotation=30)
+        ig.plot(g, folder_path + "graph_predicted.png", vertex_size=10, vertex_color=g.vs["color"], edge_width=0.3, edge_color="black", vertex_label_dist=2, vertex_label_size=0, margin=50, rotation=30)
+        
 
         # find the true labels and predicted labels
         true_labels, predicted_labels = get_true_labels_and_predicted_labels_NCBI(predicted_communities, vertex_to_sequence_id)
-        # calculate homogeneity and completeness
+         # calculate homogeneity and completeness
         homogeneity, completeness = calculate_homogeneity_and_completeness(true_labels, predicted_labels)
 
         # write the predicted communities to a file

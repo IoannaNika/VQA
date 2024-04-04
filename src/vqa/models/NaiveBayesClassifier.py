@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.utils import shuffle
 import json
 from sklearn.metrics import accuracy_score
-
+import pickle
 
 f= open("pos")
 pos = json.load(f)
@@ -31,3 +31,9 @@ gnb = GaussianNB()
 y_pred = gnb.fit(X_train, y_train).predict(X_test)
 
 print("Accuracy: ", accuracy_score(y_test, y_pred))
+
+
+# save the model
+filename = 'finalized_model.pkl'
+
+pickle.dump(gnb, open(filename, 'wb'))
