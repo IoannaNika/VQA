@@ -5,12 +5,10 @@ from torch.utils.data import DataLoader, random_split
 import torch.optim as optim
 from pytorch_lightning.loggers import WandbLogger
 import pytorch_lightning as pl
-from vqa.loss.ContrastiveSiameseLoss import ContrastiveLoss
-from vqa.data.datasets.TripletReads import TripletReads
 from vqa.lightning.TransformerBinaryNetTrainer import TransformerBinaryNetTrainer
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from transformers import TrainingArguments, Trainer, AutoModelForSequenceClassification, AutoModelForMaskedLM
+from transformers import TrainingArguments, AutoModelForSequenceClassification, AutoModelForMaskedLM
 from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
 from peft import LoraConfig, get_peft_model, TaskType, IA3Config
 from torchsummary import summary
@@ -56,7 +54,7 @@ def main():
 
     model.eval()
 
-    trainer = pl.Trainer(devices=1, accelerator='gpu', enable_progress_bar=False)
+    trainer = pl.Trainer(devices=5, accelerator='gpu', enable_progress_bar=False)
 
 
     genomic_regions = []

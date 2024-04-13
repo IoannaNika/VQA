@@ -204,7 +204,7 @@ def main():
         # assign the labels to the vertices
         g.vs["label"] = [vertex_to_sequence_id[i].split("_")[0] for i in range(n)]
         # visualize the graph with the communities with labels, and position the labels next to the vertices, not in the middle of the vertices 
-        ig.plot(g, folder_path + "graph_predicted.png", vertex_size=10, vertex_color=g.vs["color"], edge_width=0.3, edge_color="black", vertex_label_dist=2, vertex_label_size=0, margin=50, rotation=30)
+        ig.plot(g, folder_path + "graph_predicted.pdf", vertex_size=10, vertex_color=g.vs["color"], edge_width=0.3, edge_color="black", vertex_label_dist=2, vertex_label_size=0, margin=50, rotation=30)
         
 
         # find the true labels and predicted labels

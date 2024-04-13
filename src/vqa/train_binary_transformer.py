@@ -10,21 +10,25 @@ from vqa.data.datasets.SimulatedAmpliconSiameseReads import SiameseReads
 from vqa.lightning.TransformerBinaryNetTrainer import TransformerBinaryNetTrainer
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from transformers import TrainingArguments, Trainer, AutoModelForSequenceClassification, AutoModelForMaskedLM, AutoModel
+from transformers import TrainingArguments, AutoModelForSequenceClassification, AutoModelForMaskedLM, AutoModel
 from peft import LoraConfig, get_peft_model, TaskType, IA3Config
 from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
 
 def main():
+    print(torch.cuda.current_device())
     device = "cuda:0"
     n_devices = 2
-    check_point_dir = "checkpoint_binary_transformer_rev_compl/random_init_pb"
+    # random_init_pb_2
+    check_point_dir = "checkpoint_binary_transformer_rev_compl/pb_2_model"
     max_length = 800 
     batch = 10
     model = AutoModelForSequenceClassification.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", trust_remote_code=True, num_labels=2, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
     
     # re-initialize all the weights of the model to random values
     # for name, param in model.named_parameters():
+    #     print(name, param.flatten()[0])
     #     nn.init.xavier_uniform_(param)
+    #     print(name, param.flatten()[0])
 
     # , "output.dense"  
     peft_config = IA3Config(
@@ -48,7 +52,6 @@ def main():
     train_data, val_data, test_data = random_split(data, [train_count, val_count, test_count])
     # train_data, test_data = random_split(data, [train_count, test_count])
 
-
     train_datal = DataLoader(train_data, batch_size=batch, shuffle=True, pin_memory=True, num_workers=4, prefetch_factor=1)
     val_datal = DataLoader(val_data, batch_size=batch , shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=1)
     test_datal = DataLoader(test_data, batch_size=batch, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=1)
@@ -66,7 +69,7 @@ def main():
     early_stop_callback = EarlyStopping(monitor="val_acc", patience=3, verbose=False, mode="max")
     # checkpoint_callback = ModelCheckpoint(dirpath=check_point_dir, save_top_k=3, monitor="val_acc", mode="max")
     binary_transformer = TransformerBinaryNetTrainer(peft_model, train_datal, val_datal, test_datal,optimizer, batch, device = device, checkpoint_dir = check_point_dir, max_length=max_length, outdir = None)
-    trainer = pl.Trainer(max_epochs=15, logger=wandb_logger,  accumulate_grad_batches=100, strategy='ddp_find_unused_parameters_true', callbacks=[early_stop_callback], devices=n_devices, accelerator="gpu", enable_progress_bar=False)
+    trainer = pl.Trainer(max_epochs=15, logger=wandb_logger,  accumulate_grad_batches=10, strategy='ddp_find_unused_parameters_true', callbacks=[early_stop_callback], devices=n_devices, accelerator="gpu", enable_progress_bar=False)
     trainer.fit(binary_transformer)
     wandb_logger.experiment.unwatch(peft_model)
     trainer.test()
