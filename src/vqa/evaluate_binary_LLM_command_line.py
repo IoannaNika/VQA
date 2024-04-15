@@ -23,6 +23,8 @@ def main():
     parser.add_argument('--outdir', dest = 'outdir', required=True, type=str, help="output directory")
     parser.add_argument('--path_to_dataset', dest = 'path_to_dataset', required=True, type=str, help="Path to input dataset")
     parser.add_argument('--append_mode', dest ="append_mode", required=False, default=False, type=bool, help="to append to existing prediction file or to create a new one and delete an existing one")
+    parser.add_argument('--lumc', dest ="lumc", required=False, default=False, type=bool, help="lumc data or not")
+    parser.add_argument('--devices', dest="devices", required=False, default=1, type=int, help="number of gpus")
     args = parser.parse_args()
     
 
@@ -54,7 +56,7 @@ def main():
 
     model.eval()
 
-    trainer = pl.Trainer(devices=5, accelerator='gpu', enable_progress_bar=False)
+    trainer = pl.Trainer(devices=args.devices, accelerator='gpu', enable_progress_bar=False)
 
 
     genomic_regions = []
@@ -78,9 +80,11 @@ def main():
     for gr in genomic_regions: 
 
         gr = str(gr[0]) + "_" + str(gr[1])  
+        if args.lumc:
+            data = LUMCReads(directory = args.path_to_dataset, genomic_region = gr, test_mode = True )
+        else:
+            data = SiameseReads(directory = args.path_to_dataset, test_mode=True, genomic_region = gr)
 
-        data = SiameseReads(directory = args.path_to_dataset, test_mode=True, genomic_region = gr)
-        # data = LUMCReads(directory = args.path_to_dataset, genomic_region = gr, test_mode = True )
         print(data.length)
         if data.length == 0: 
             continue

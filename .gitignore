@@ -47,3 +47,5 @@ src/vqa/*.pkl
 src/vqa/*.err
 src/vqa/Experiments/*
 src/vqa/checkpoint_binary_transformer_rev_compl/*
+src/vqa/final_checkpoints/*
+src/vqa/results_arch/*

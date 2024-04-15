@@ -14,9 +14,9 @@ class SiameseReads(Dataset):
        
         # read tsv file
         if self.test_mode == False:
-            self.reference_set = pd.read_csv(self.directory + "/samples.tsv", sep='\t', header=0)
+            self.reference_set = pd.read_csv(self.directory + "/samples.tsv", sep='\t', header=0, on_bad_lines='skip')
         else:
-            self.reference_set = pd.read_csv(self.directory + "/all_test_pairs.tsv", sep='\t', header=0)
+            self.reference_set = pd.read_csv(self.directory + "/all_test_pairs.tsv", sep='\t', header=0, on_bad_lines='skip')
 
         # self.reference_set = self.reference_set[self.reference_set["label"] != "positive"]
         # print(self.reference_set)

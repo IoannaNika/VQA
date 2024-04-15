@@ -6,6 +6,7 @@ import torch.optim as optim
 from pytorch_lightning.loggers import WandbLogger
 import pytorch_lightning as pl
 import wandb
+import argparse
 from vqa.data.datasets.SimulatedAmpliconSiameseReads import SiameseReads
 from vqa.lightning.TransformerBinaryNetTrainer import TransformerBinaryNetTrainer
 from pytorch_lightning.callbacks import ModelCheckpoint, StochasticWeightAveraging
@@ -15,20 +16,27 @@ from peft import LoraConfig, get_peft_model, TaskType, IA3Config
 from vqa.data.datasets.AmpliconSiameseReads import SiameseReads as LUMCReads
 
 def main():
-    print(torch.cuda.current_device())
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--devices', type=int, required=True)
+    parser.add_argument('--checkpoint_dir', type=str, required=True)
+    parser.add_argument('--init_random', type=str, required=False, default = "False")
+    parser.add_argument('--pb', type=str, required=True, help="if False will assume ONT reads")
+    args = parser.parse_args()
+
     device = "cuda:0"
-    n_devices = 2
+    n_devices = args.devices
     # random_init_pb_2
-    check_point_dir = "checkpoint_binary_transformer_rev_compl/pb_2_model"
+    check_point_dir = args.checkpoint_dir
     max_length = 800 
     batch = 10
     model = AutoModelForSequenceClassification.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", trust_remote_code=True, num_labels=2, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
-    
-    # re-initialize all the weights of the model to random values
-    # for name, param in model.named_parameters():
-    #     print(name, param.flatten()[0])
-    #     nn.init.xavier_uniform_(param)
-    #     print(name, param.flatten()[0])
+
+    if args.init_random == "True":
+        #re-initialize all the weights of the model to random values
+        for name, param in model.named_parameters():
+            print(name, param.flatten()[0])
+            nn.init.xavier_uniform_(param)
+            print(name, param.flatten()[0])
 
     # , "output.dense"  
     peft_config = IA3Config(
@@ -40,9 +48,14 @@ def main():
         print(name)
         if "classifier" in name:
             param.requires_grad = True
-            
-    data = SiameseReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset')
-
+    
+    if args.pb == "True":
+        # PB-hifi    
+        data = SiameseReads(directory='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset')
+    if args.pb == "False":
+        # ONT
+        data = SiameseReads(directory ='/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_ONT_sars_cov_2_rev_compl/dataset')
+    
     train_count = int(len(data)*0.8)
     val_count = int(len(data)*0.1)
     test_count =  len(data) - train_count - val_count

@@ -16,7 +16,7 @@ previous=$(/usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utili
 
 module load cuda/12.2
 
-for n in 20 15 10 5 1
+for n in 10
 do 
     echo srun python evaluate_binary_LLM_command_line.py  --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/sars_cov_2/PacBio-Hifi/100/$n/dataset --outdir Experiments/sars_cov_2/PacBio-Hifi/100/$n
     srun python evaluate_binary_LLM_command_line.py  --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/sars_cov_2/PacBio-Hifi/100/$n/dataset --outdir Experiments/sars_cov_2/PacBio-Hifi/100/$n

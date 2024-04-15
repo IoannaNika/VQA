@@ -102,7 +102,7 @@ def main():
     for subdir in avg_results.keys():
             variance = np.var([results[subdir][gr]['n_pred_edges']/results[subdir][gr]['n_true_edges'] for gr in results[subdir].keys()])
             variance_ratio_edges.append(variance)
-
+    plt.axhline(y=1, color='black', linestyle='--')
     plt.bar(np.arange(len(avg_results.keys())), bars_homogeneity, color='#882255', width=0.2, label='Homogeneity')
     plt.errorbar(np.arange(len(avg_results.keys())), bars_homogeneity, yerr=variance_homogeneity, fmt='o', color='black', capsize=5)
     plt.bar(np.arange(len(avg_results.keys())) + 0.2, bars_completeness, color='#44AA99', width=0.2, label='Completeness')
