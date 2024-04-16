@@ -18,9 +18,12 @@
 # echo "srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset.tsv"
 # srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset.tsv
 
+########## REV COMPLEMENT CORRECTED ##############
 
+# echo "srun python plot_ed_distribution.py --ref_set /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset/samples.tsv --directory /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset"
+# srun python plot_ed_distribution.py --ref_set /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset/samples.tsv --directory /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset
+# echo "srun python models/NaiveBayesClassifier.py"
+# srun python models/NaiveBayesClassifier.py
 
-echo "srun python plot_ed_distribution.py --ref_set /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset/samples.tsv --directory /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset"
-srun python plot_ed_distribution.py --ref_set /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset/samples.tsv --directory /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/tuples_pacbio_sars_cov_2_rev_compl_more/dataset
-echo "srun python models/NaiveBayesClassifier.py"
-srun python models/NaiveBayesClassifier.py
+echo "srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_rev_compl/all_test_pairs.tsv"
+srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_rev_compl/all_test_pairs.tsv
