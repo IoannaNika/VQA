@@ -47,7 +47,7 @@ def main():
 
 
     nt = AutoModelForSequenceClassification.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", num_labels =2,  trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
-    adapter_name = "checkpoint_binary_transformer/7" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_168h/11" #"checkpoint_binary_transformer_rev_compl/500m_pac_bio_with_output_dense/8" #"checkpoint_binary_transformer/7" "#checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_168h/11"  #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_long/4" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m/1" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query/6"
+    adapter_name = "final_checkpoints/ONT/2" #"checkpoint_binary_transformer/7" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_168h/11" #"checkpoint_binary_transformer_rev_compl/500m_pac_bio_with_output_dense/8" #"checkpoint_binary_transformer/7" "#checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_168h/11"  #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m_long/4" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query_more_data_500m/1" #"checkpoint_binary_transformer/IA3_gpu_dense_no_query/6"
 
     model = PeftModel.from_pretrained(nt, adapter_name)
     model = model.merge_and_unload()
@@ -76,11 +76,8 @@ def main():
     if args.virus_name == "HCV-1b":
         genomic_regions = [(72, 1065), (985, 1946), (1842, 2800), (2703, 3698), (3495, 4459), (4314, 5279), (5215, 6167), (6068, 7008), (6930, 7899), (7740, 8681), (8300, 9280)]
 
-    if args.virus_name == "NA":
-        genomic_regions  = [("N", "A")]
 
     for gr in genomic_regions: 
-
         gr = str(gr[0]) + "_" + str(gr[1])  
         if args.lumc == "True":
             data = LUMCReads(directory = args.path_to_dataset, genomic_region = gr, test_mode = True )

@@ -15,7 +15,7 @@ def main():
     haplotypes = [1, 5, 10, 15, 20]
     results = dict()
     for h in haplotypes:
-        meta_results = os.path.join(args.directory, str(h), "meta_results.tsv")
+        meta_results = os.path.join(args.directory, str(h), "meta_results_2.tsv")
         # load meta results
         meta_results = pd.read_csv(meta_results, sep="\t", header=0)
 
@@ -73,7 +73,7 @@ def main():
                 patch.set_facecolor(color)
 
     # ax[0].set_title("Mean haplotype number\nunderestimation (-) or overestimation (+)\n(over genomic regions)")
-    ax[0].set_ylabel("Number of haplotypes\nunderestimated(-)/overestimated(+)\n(over the genomic regions)")
+    ax[0].set_ylabel("Number of haplotypes not covered\n(over the genomic regions)")
     ax[0].set_xlabel("True number of haplotypes")           
 
     # ax[1].set_title("Absolute relative abundance error\n(over genomic regions)")

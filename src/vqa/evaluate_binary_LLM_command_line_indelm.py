@@ -76,8 +76,6 @@ def main():
     if args.virus_name == "HCV-1b":
         genomic_regions = [(72, 1065), (985, 1946), (1842, 2800), (2703, 3698), (3495, 4459), (4314, 5279), (5215, 6167), (6068, 7008), (6930, 7899), (7740, 8681), (8300, 9280)]
 
-    if args.virus_name == "NA":
-        genomic_regions  = [("N", "A")]
 
     for gr in genomic_regions: 
 

@@ -7,6 +7,34 @@ import numpy as np
 import editdistance
 from Bio import SeqIO
 
+
+def parse_nb(file): 
+
+    with open(file, "r") as f:
+        lines = f.readlines()
+
+        nb_dict =  {}
+
+        # Genomic region: 54 - 1183
+        # Accuracy:  0.5315068493150685
+
+        cnt = 0
+        while cnt < len(lines):
+            line = lines[cnt]
+            gr = line.split(":")[1].strip().split("-")
+            gr = gr[0].strip() + "_" + gr[1].strip()
+            cnt += 1
+            line = lines[cnt]
+            accuracy = line.split(":")[1].strip()
+            if accuracy == "NA": 
+                accuracy = 0.0
+            else:
+                accuracy = float(accuracy)
+            nb_dict[gr] = accuracy
+            cnt += 1
+    
+    return nb_dict
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_dir', type=str, required=True)
@@ -14,6 +42,11 @@ def main():
     args = parser.parse_args()
 
     file = os.path.join(args.input_dir, "predictions.tsv")
+    nb_predictions = os.path.join(args.input_dir, "nb_predictions.out")
+
+    nb_dict = parse_nb(nb_predictions)
+
+
 
     # read tsv file
     df = pd.read_csv(file, sep='\t', header=0)
@@ -78,11 +111,10 @@ def main():
         genomic_regions.append(str(bin[0]) + "-" + str(bin[1]))
 
     m_diff = max(differences)
-    differences_norm = [x/m_diff for x in differences]
 
     # create dict with genomic regions as keys and differences as values
     differences_dict = {}
-    for gr, diff in zip(genomic_regions, differences_norm):
+    for gr, diff in zip(genomic_regions, differences):
         differences_dict[gr] = diff
 
 
@@ -103,39 +135,41 @@ def main():
     for gr in results.keys():
         bar_recall.append(results[gr]['recall'])
 
-    fig = plt.figure(figsize=(30, 10))
+    fig, ax = plt.subplots()
     #plot bars next to each other
     width = 0.25
 
     x = np.arange(len(results.keys()))
 
-    plt.bar(x, bar_accuracy, width, label='Accuracy', color = "#785EF0")
-    plt.bar(x+0.2, bar_precision, width, label='Precision', color = "#FFB000")
-    plt.bar(x+0.4, bar_recall, width, label='Recall', color = "#648FFF")
-    plt.plot(x+0.2, [differences_dict[key.replace("_", "-")] for key in results.keys()], label="Normalized edit distance between consensus sequences", color="black", linestyle='--', marker='o', alpha=1.0)
-
-
-
-
-    plt.ylabel('Scores', fontsize=20)
-    plt.xlabel('Genomic region', fontsize=20)
-    # rotate x-axis labels
-    print(x + 0.3, results.keys())
     xticks = []
     for gr in results.keys():
         xticks.append(gr.replace('_', '-'))
         
-    plt.xticks(x+ 0.3, xticks)
-    plt.ylim(0.0, 1.1)
+    plt.xticks(x, xticks, rotation=90, fontsize=9)
+    plt.legend(fontsize=9)
 
-    # plt.xticks(list(results.keys()))
-    plt.xticks(rotation=45, fontsize =15)
-    plt.yticks(fontsize=15)
-    plt.legend(fontsize=17)
+    ax.bar(x, bar_accuracy, width, label='Preliminary goViral model', color = "deepskyblue")
+    ax.bar(x + 0.3, [nb_dict[key] for key in results.keys()], width, label='Naive Bayes model (baseline)', color= "#FE6100", alpha=0.7)
+    ax.set_ylim([0.0, 1.1])
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel('Genomic region')
+    ax.legend()
+
+    ax2 = ax.twinx() 
+    # plt.bar(x+0.2, bar_precision, width, label='Precision', color = "#FFB000")
+    # plt.bar(x+0.4, bar_recall, width, label='Recall', color = "#648FFF")
+    ax2.plot(x, [differences_dict[key.replace("_", "-")] for key in results.keys()], color="purple", linestyle='', marker='o', alpha=1.0)
+    ax2.set_ylim([0.0, 50])
+    ax2.set_ylabel('Edit distance between\ntrue local haplotypes', color = "purple")
+
+    # rotate x-axis labels
+
+    plt.ylim(bottom=0)
+    # plt.yticks(fontsize=12)
 
     plt.tight_layout()
 
-    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_v2.pdf"))
+    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_v3.pdf"))
         
 
 if __name__ == "__main__":

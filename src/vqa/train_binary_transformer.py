@@ -33,10 +33,15 @@ def main():
 
     if args.init_random == "True":
         #re-initialize all the weights of the model to random values
-        for name, param in model.named_parameters():
-            print(name, param.flatten()[0])
-            nn.init.xavier_uniform_(param)
-            print(name, param.flatten()[0])
+        for name, param in model.named_parameters(): 
+            # get dimension of the parameter
+            dim = param.size()
+            # re-initialize the parameter
+            if len(dim) > 1:
+                nn.init.xavier_uniform_(param)
+            else:
+                nn.init.zeros_(param)
+
 
     # , "output.dense"  
     peft_config = IA3Config(
@@ -69,7 +74,7 @@ def main():
     val_datal = DataLoader(val_data, batch_size=batch , shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=1)
     test_datal = DataLoader(test_data, batch_size=batch, shuffle=False, pin_memory=True, num_workers=4, prefetch_factor=1)
       
-    optimizer = optim.Adam(peft_model.parameters(), lr=7e-3)
+    optimizer = optim.Adam(peft_model.parameters(), lr=7e-2)
     # optimizer = {"optimizer": adam, "lr_scheduler": optim.lr_scheduler.StepLR(adam, step_size=1, gamma=0.1)}
 
     os.environ["WANDB_DIR"] = "/tmp"
