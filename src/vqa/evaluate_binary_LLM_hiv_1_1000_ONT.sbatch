@@ -16,7 +16,7 @@ previous=$(/usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utili
 
 module load cuda/12.2
 
-for ab in ab_50_50 ab_70_30 ab_97_03 ab_03_97 ab_30_70 ab_997_003 ab_003_997 
+for ab in ab_30_70 ab_997_003 ab_003_997 
 do 
     echo "srun python evaluate_binary_LLM_command_line_ONT.py --devices 3 --virus_name HIV-1 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/HIV-1/ONT/99/1000/$ab/dataset --outdir Experiments/HIV-1/ONT/1000/$ab"
     srun python evaluate_binary_LLM_command_line_ONT.py --devices 3 --virus_name HIV-1 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/HIV-1/ONT/99/1000/$ab/dataset --outdir Experiments/HIV-1/ONT/1000/$ab

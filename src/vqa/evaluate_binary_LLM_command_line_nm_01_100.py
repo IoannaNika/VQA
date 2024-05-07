@@ -32,18 +32,18 @@ def main():
 
     
     # if it exists, delete it
-    if os.path.exists(out_file_path) and args.append_mode == "False":
-        os.remove(out_file_path)
+    # if os.path.exists(out_file_path) and args.append_mode == "False":
+    #     os.remove(out_file_path)
     
-        # create the file
-        f = open(out_file_path, "w")
-        f.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
-        f.close()
+    #     # create the file
+    #     f = open(out_file_path, "x")
+    #     f.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
+    #     f.close()
     
-    if os.path.exists(out_file_path)  == False: 
-        f = open(out_file_path, "w")
-        f.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
-        f.close()
+    # if os.path.exists(out_file_path)  == False: 
+    #     f = open(out_file_path, "x")
+    #     f.write("Genomic_region\tSequence_1_id\tSequence_1\tSequence_2_id\tSequence_2\tPredicted_label\tPredicted_probability\tTrue_label\n")
+    #     f.close()
 
 
     nt = AutoModelForSequenceClassification.from_pretrained("InstaDeepAI/nucleotide-transformer-v2-500m-multi-species", num_labels =2,  trust_remote_code=True, cache_dir = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/VQA/src/vqa/cache")
@@ -62,9 +62,7 @@ def main():
     genomic_regions = []
     
     if args.virus_name == "SARS-CoV-2":
-        genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 5337),
-                            (5286, 6358), (6307, 7379), (7328, 8363), (8282, 9378), (9327, 10429),
-                            (10370, 11447), (11394, 12538), (12473, 13599), (13532, 14619),
+        genomic_regions = [ (10370, 11447), (11394, 12538), (12473, 13599), (13532, 14619),
                             (14568, 15713), (15634, 16698), (16647, 17732), (17649, 18684),
                             (18618, 19655), (19604, 20676), (20581, 21620), (21562, 22590),
                             (22537, 23609), (23544, 24714), (24658, 25768), (25712, 26835),
@@ -76,12 +74,10 @@ def main():
     if args.virus_name == "HCV-1b":
         genomic_regions = [(72, 1065), (985, 1946), (1842, 2800), (2703, 3698), (3495, 4459), (4314, 5279), (5215, 6167), (6068, 7008), (6930, 7899), (7740, 8681), (8300, 9280)]
 
-    if args.virus_name == "NA":
-        genomic_regions  = [("N", "A")]
 
     for gr in genomic_regions: 
 
-        gr = str(gr[0]) + "_" + str(gr[1])  
+        # gr = str(gr[0]) + "_" + str(gr[1])  
         if args.lumc == "True":
             data = LUMCReads(directory = args.path_to_dataset, genomic_region = gr, test_mode = True )
         else:

@@ -120,20 +120,20 @@ def main():
     ax.axhline(y=11, color='black', linestyle='--', label='Number of genomic regions')
 
 
-    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)') #, fontweight = "bold")
-    ax.set_xlabel('Relative abundance for the HCV-1b sequences') #, fontweight = "bold")
+    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)' ,fontsize=13) #, fontweight = "bold")
+    ax.set_xlabel('Relative abundance for the HCV-1b sequences', fontsize=13) #, fontweight = "bold")
 
     # ax.set_xticks(xticks)
-    plt.legend()
+    plt.legend(fontsize=13)
     # plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     xr = [i  + 0.4 for i in range(0,len(xticks))]
 
     plt.xticks(xr, xticks)
     
-    plt.xticks(fontsize=9, fontweight ="normal")
-    plt.yticks(fontsize=9, fontweight ="normal")
+    plt.xticks(fontsize=13, fontweight ="normal")
+    plt.yticks(fontsize=13, fontweight ="normal")
 
-
+    plt.ylim([0, 100])
     plt.tight_layout()
 
     plt.savefig(args.output_dir + '/edit_distance_to_consensus_2.pdf')

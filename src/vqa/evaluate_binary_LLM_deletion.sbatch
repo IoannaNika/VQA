@@ -16,7 +16,7 @@ previous=$(/usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utili
 
 module load cuda/12.2
 
-for n in 20 30 40 50
+for n in 1 2 3 4 5 6 7 8 9 10 20 30 40 50
 do 
     echo "srun python evaluate_binary_LLM_command_line_indelm.py --devices 2 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/deletion_datasets/$n/dataset --outdir Experiments/deletions/$n"
     srun python evaluate_binary_LLM_command_line_indelm.py --devices 2 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/deletion_datasets/$n/dataset --outdir Experiments/deletions/$n

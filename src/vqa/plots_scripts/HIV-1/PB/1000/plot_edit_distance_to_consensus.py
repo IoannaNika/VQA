@@ -35,12 +35,9 @@ def get_edit_distances(input_dir, seq_ids, genomic_regions):
         consensus_eval_file = pd.read_csv(file, sep='\t', header=0)
 
         for index, row in consensus_eval_file.iterrows():
-            
             sequence_id = row['Sequence_id']
             genomic_region = row['Genomic_region']
             edit_distance = row['Edit_distance']
-
-            print(sequence_id, genomic_region)
 
             edit_distances[sequence_id][subdir][genomic_region] = edit_distance
 
@@ -52,12 +49,11 @@ def main():
     parser.add_argument('--output_dir', type=str, required=True)
     args = parser.parse_args()
 
-    genomic_regions = ["72_1065", "985_1946", "1842_2800", "2703_3698", "3495_4459", "4314_5279", "5215_6167", "6068_7008", "6930_7899", "7740_8681", "8300_9280"]
-    sequence_ids = ["D50483.1", "D50482.1"]
+    genomic_regions = ["30_1028", "947_1907", "1823_2775", "2687_3621", "3516_4474", "4374_5354", "5272_6237", "6126_7120", "7029_8011", "7931_8862"]
+    sequence_ids = ["OQ551959.1", "OQ551961.1"]
 
     # get edit distances
     edit_distances = get_edit_distances(args.input_dir, sequence_ids, genomic_regions)
-    print(edit_distances)
 
     # get average over genomic regions
     ed_avges = {}
@@ -70,19 +66,16 @@ def main():
                 na_num[subdir] = 0
             ed_avges[seq_id][subdir] = 0
             count = 0
-
+            count_na = 0
             for region in genomic_regions:
                 if not np.isnan(edit_distances[seq_id][subdir][region]):
                     ed_avges[seq_id][subdir] += edit_distances[seq_id][subdir][region]
                     count += 1
                 else:
                    na_num[subdir] += 1
-            try: 
-                ed_avges[seq_id][subdir] = ed_avges[seq_id][subdir] / count
-            except: 
-                ed_avges[seq_id][subdir] = np.nan
 
-    print(ed_avges, na_num)
+            ed_avges[seq_id][subdir] = ed_avges[seq_id][subdir] / count
+
 
     bar_seq_1 = []
     for subdir in ['ab_03_97', 'ab_30_70', 'ab_50_50', 'ab_70_30', 'ab_97_03']:
@@ -103,12 +96,12 @@ def main():
 
     for x in xticks: 
         if x[0][0] == "0": 
-            xticks_new.append(x[0][1] + "%" + " and " + x[1] + "%")
+            xticks_new.append(x[0][1] + "%" + " and\n" + x[1] + "%")
         else: 
             if x[1][0] == "0":
-                xticks_new.append(x[0]  + "%" + " and " + x[1][1] + "%")
+                xticks_new.append(x[0]  + "%" + " and\n" + x[1][1] + "%")
             else: 
-                xticks_new.append(x[0]  + "%" + " and " + x[1] + "%")
+                xticks_new.append(x[0]  + "%" + " and\n" + x[1] + "%")
 
     xticks = xticks_new
     # xticks = [ if x[0][0] == "0" then x[0][1] else  x[0] + "%" + " and " + x[1] + "%" for x in xticks]
@@ -117,29 +110,27 @@ def main():
     x = np.arange(len(bar_seq_1))
     width = 0.2
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots()
     ax.bar(x + 0.2, bar_seq_1, width, label=sequence_ids[0], color = "#DDCC77")
     ax.errorbar(x + 0.2, bar_seq_1, yerr= np.var(bar_seq_1), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
     ax.bar(x + 0.4, bar_seq_2, width, label=sequence_ids[1], color = "#332288")
     ax.errorbar(x + 0.4, bar_seq_2, yerr= np.var(bar_seq_2), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
-    ax.bar(x + 0.6, bar_3_nas, width, label="Number of haplotypes\nnot found", color = "#AA4499")
-    ax.axhline(y=11, color='black', linestyle='--', label='Number of genomic regions')
+    ax.bar(x + 0.6, bar_3_nas, width, label="Number of haplotypes not found", color = "#AA4499")
 
+    # ax.axhline(y=10, color='black', linestyle='--', label='Number of genomic regions')
 
-    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=13) #, fontweight = "bold")
-    ax.set_xlabel('Relative abundance for the HCV-1b sequences', fontsize=13) #, fontweight = "bold")
+    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=35) #, fontweight = "bold")
+    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=35) #, fontweight = "bold")
 
     # ax.set_xticks(xticks)
-    plt.legend(fontsize=13)
-    plt.ylim([0, 100])
-    # plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    ax.legend(fontsize=30)
     xr = [i  + 0.4 for i in range(0,len(xticks))]
 
     plt.xticks(xr, xticks)
     
-    plt.xticks(fontsize=13, fontweight ="normal")
-    plt.yticks(fontsize=13, fontweight ="normal")
-
+    plt.xticks(fontsize=30, fontweight ="normal")
+    plt.yticks(fontsize=30, fontweight ="normal")
+    plt.ylim([0, 12])
 
     plt.tight_layout()
 

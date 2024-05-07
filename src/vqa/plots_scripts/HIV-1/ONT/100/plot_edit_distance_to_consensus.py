@@ -125,18 +125,18 @@ def main():
     ax.axhline(y=10, color='black', linestyle='--', label='Number of genomic regions')
 
 
-    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=15) #, fontweight = "bold")
-    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=15) #, fontweight = "bold")
-    plt.ylim([0, 13])
+    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=25) #, fontweight = "bold")
+    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=25) #, fontweight = "bold")
+    plt.ylim([0, 15])
     # ax.set_xticks(xticks)
-    plt.legend(fontsize=15, loc='upper right')
+    plt.legend(fontsize=25, loc='upper right')
     # plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     xr = [i  + 0.4 for i in range(0,len(xticks))]
 
     plt.xticks(xr, xticks)
     
-    plt.xticks(fontsize=15, fontweight ="normal")
-    plt.yticks(fontsize=15, fontweight ="normal")
+    plt.xticks(fontsize=25, fontweight ="normal")
+    plt.yticks(fontsize=25, fontweight ="normal")
 
 
     plt.tight_layout()

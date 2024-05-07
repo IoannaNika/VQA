@@ -86,17 +86,17 @@ def main():
         # overlay a box plot
         extra_haplotypes[h] = [abs(hup) for hup in extra_haplotypes[h]]
 
-        bplot1 = ax[0, 0].boxplot(extra_haplotypes[h], positions=[h], widths=0.6, patch_artist=True, vert=True)
+        bplot1 = ax[0, 0].boxplot(extra_haplotypes[h], positions=[h], widths=0.7, patch_artist=True, vert=True)
         bplots1.append(bplot1)
 
         # ax[1].bar(h, sum(mean_abs_relative_ab_error[h])/len(mean_abs_relative_ab_error[h]), label=str(h))
-        bplot2 = ax[0,1].boxplot(mean_abs_relative_ab_error[h],  positions=[h], widths=0.6, patch_artist=True, vert=True)
+        bplot2 = ax[0,1].boxplot(mean_abs_relative_ab_error[h],  positions=[h], widths=0.7, patch_artist=True, vert=True)
         bplots2.append(bplot2)
         # ax[2].bar(h, sum(mean_edit_distance[h])/len(mean_edit_distance[h]), label=str(h))
-        bplot3 = ax[1,0].boxplot(mean_edit_distance[h],  positions=[h], widths=0.6, patch_artist=True, vert=True)
+        bplot3 = ax[1,0].boxplot(mean_edit_distance[h],  positions=[h], widths=0.7, patch_artist=True, vert=True)
         bplots3.append(bplot3)
 
-        bplot4 = ax[1,1].boxplot(false_positives[h],  positions=[h], widths=0.6, patch_artist=True)
+        bplot4 = ax[1,1].boxplot(false_positives[h],  positions=[h], widths=0.7, patch_artist=True)
         bplots4.append(bplot4)
 
     for bplots in [bplots1, bplots2, bplots3, bplots4]:
@@ -106,29 +106,29 @@ def main():
     
 
  
-    ax[0,0].set_ylabel("Number of haplotypes not found", fontsize=20)
-    ax[0,0].set_xlabel("True number of haplotypes",fontsize=20)   
+    ax[0,0].set_ylabel("Number of haplotypes not found", fontsize=30)
+    ax[0,0].set_xlabel("True number of haplotypes",fontsize=30)   
     ax[0,0].set_ylim(bottom=0)
-    ax[0,0].tick_params(axis='both', which='major', labelsize=17)  # Adjust the labelsize as needed
+    ax[0,0].tick_params(axis='both', which='major', labelsize=25)  # Adjust the labelsize as needed
 
 
 
-    ax[0,1].set_ylabel("Mean relative abundance error", fontsize=20)
-    ax[0,1].set_xlabel("True number of haplotypes", fontsize=20)
+    ax[0,1].set_ylabel("Mean relative abundance error", fontsize=30)
+    ax[0,1].set_xlabel("True number of haplotypes", fontsize=30)
     ax[0,1].set_ylim(bottom=0)
-    ax[0,1].tick_params(axis='both', which='major', labelsize=17)  # Adjust the labelsize as needed
+    ax[0,1].tick_params(axis='both', which='major', labelsize=25)  # Adjust the labelsize as needed
 
 
-    ax[1,0].set_ylabel("Mean edit distance", fontsize=20)
-    ax[1,0].set_xlabel("True number of haplotypes", fontsize=20)
+    ax[1,0].set_ylabel("Mean edit distance", fontsize=30)
+    ax[1,0].set_xlabel("True number of haplotypes", fontsize=30)
     ax[1,0].set_ylim(bottom=0)
-    ax[1,0].tick_params(axis='both', which='major', labelsize=17)  # Adjust the labelsize as needed
+    ax[1,0].tick_params(axis='both', which='major', labelsize=25)  # Adjust the labelsize as needed
 
 
     ax[1,1].set_ylabel("Haplotype assemblies\nnot assigned to a true haplotype", fontsize=20)
-    ax[1,1].set_xlabel("True number of haplotypes", fontsize=20)
+    ax[1,1].set_xlabel("True number of haplotypes", fontsize=30)
     ax[1,1].set_ylim(bottom=0)
-    ax[1,1].tick_params(axis='both', which='major', labelsize=17)  # Adjust the labelsize as needed
+    ax[1,1].tick_params(axis='both', which='major', labelsize=25)  # Adjust the labelsize as needed
 
 
     # show only x ticks that are in the haplotypes list
