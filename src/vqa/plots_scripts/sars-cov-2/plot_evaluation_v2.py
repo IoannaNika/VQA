@@ -125,7 +125,7 @@ def main():
     ax[1,0].tick_params(axis='both', which='major', labelsize=25)  # Adjust the labelsize as needed
 
 
-    ax[1,1].set_ylabel("Haplotype assemblies\nnot assigned to a true haplotype", fontsize=20)
+    ax[1,1].set_ylabel("Haplotype assemblies\nnot assigned to a true haplotype", fontsize=30)
     ax[1,1].set_xlabel("True number of haplotypes", fontsize=30)
     ax[1,1].set_ylim(bottom=0)
     ax[1,1].tick_params(axis='both', which='major', labelsize=25)  # Adjust the labelsize as needed
@@ -135,8 +135,9 @@ def main():
     ax[0,0].set_xticks(haplotypes)
     # xlimit
     ax[0,0].set_xlim(0, 22)
-    ax[0,0].set_ylim(0, 21)
     ax[0,1].set_xlim(0, 22)
+    ax[0,0].set_ylim(0, 21)
+    # ax[0,1].set_xlim(0, 22)
     # ax[1].set_ylim(0, 20)
     ax[1,0].set_xlim(0, 22)
     # ax[2].set_ylim(0, 2)

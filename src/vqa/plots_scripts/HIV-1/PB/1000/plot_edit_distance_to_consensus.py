@@ -61,7 +61,7 @@ def main():
 
     for seq_id in sequence_ids:
         ed_avges[seq_id] = {}
-        for  subdir in ['ab_03_97', 'ab_30_70', 'ab_50_50', 'ab_70_30', 'ab_97_03']:
+        for  subdir in ["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"]:
             if subdir not in na_num.keys():
                 na_num[subdir] = 0
             ed_avges[seq_id][subdir] = 0
@@ -78,34 +78,38 @@ def main():
 
 
     bar_seq_1 = []
-    for subdir in ['ab_03_97', 'ab_30_70', 'ab_50_50', 'ab_70_30', 'ab_97_03']:
+    for subdir in ["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"]:
         bar_seq_1.append(ed_avges[sequence_ids[0]][subdir])
     
     
     bar_seq_2 = []
-    for subdir in ['ab_03_97', 'ab_30_70', 'ab_50_50', 'ab_70_30', 'ab_97_03']:
+    for subdir in ["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"]:
             bar_seq_2.append(ed_avges[sequence_ids[1]][subdir])
 
     
     bar_3_nas = list(na_num.values())
     
 
-    xticks = ['ab_03_97', 'ab_30_70', 'ab_50_50', 'ab_70_30', 'ab_97_03'] #list(edit_distances[sequence_ids[0]].keys())
+    xticks =["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"] #list(edit_distances[sequence_ids[0]].keys())
     xticks = [x[3:].split("_") for x in xticks]
     xticks_new =[]
 
     for x in xticks: 
-        if x[0][0] == "0": 
-            xticks_new.append(x[0][1] + "%" + " and\n" + x[1] + "%")
-        else: 
-            if x[1][0] == "0":
-                xticks_new.append(x[0]  + "%" + " and\n" + x[1][1] + "%")
-            else: 
-                xticks_new.append(x[0]  + "%" + " and\n" + x[1] + "%")
+        if x[0][0:3] == "003":
+            xticks_new.append( "0.3" + "%\n(seq1)" + "\nand\n" + "99.7" + "%\n(seq2)")
+        else:
+            if x[1][0:3] == "997":
+                xticks_new.append( "99.7" + "%\n(seq1)" + "\nand\n" + "0.3" + "%\n(seq2)")
+            else:
+                if x[0][0] == "0": 
+                    xticks_new.append(x[0][1] + "%\n(seq1)" + "\nand\n" + x[1] + "%\n(seq2)")
+                else: 
+                    if x[1][0] == "0":
+                        xticks_new.append(x[0]  + "%\n(seq1)" + "\nand\n" + x[1][1] + "%\n(seq2)")
+                    else: 
+                        xticks_new.append(x[0]  + "%\n(seq1)" + "\nand\n" + x[1] + "%\n(seq2)")
 
     xticks = xticks_new
-    # xticks = [ if x[0][0] == "0" then x[0][1] else  x[0] + "%" + " and " + x[1] + "%" for x in xticks]
-    
 
     x = np.arange(len(bar_seq_1))
     width = 0.2
@@ -119,17 +123,17 @@ def main():
 
     # ax.axhline(y=10, color='black', linestyle='--', label='Number of genomic regions')
 
-    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=35) #, fontweight = "bold")
-    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=35) #, fontweight = "bold")
+    ax.set_ylabel('Edit distance to true haplotype\n(average over genomic regions)', fontsize=15) #, fontweight = "bold")
+    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=15) #, fontweight = "bold")
 
     # ax.set_xticks(xticks)
-    ax.legend(fontsize=30)
+    ax.legend(fontsize=12)
     xr = [i  + 0.4 for i in range(0,len(xticks))]
 
     plt.xticks(xr, xticks)
     
-    plt.xticks(fontsize=30, fontweight ="normal")
-    plt.yticks(fontsize=30, fontweight ="normal")
+    plt.xticks(fontsize=12, fontweight ="normal")
+    plt.yticks(fontsize=12, fontweight ="normal")
     plt.ylim([0, 12])
 
     plt.tight_layout()

@@ -96,12 +96,12 @@ def main():
 
     for x in xticks: 
         if x[0][0] == "0": 
-            xticks_new.append(x[0][1] + "%" + " and\n" + x[1] + "%")
+            xticks_new.append(x[0][1] + "% (seq1)\n" + "and\n" + x[1] + "% (seq2)")
         else: 
             if x[1][0] == "0":
-                xticks_new.append(x[0]  + "%" + " and\n" + x[1][1] + "%")
+                xticks_new.append(x[0]  + "% (seq1)\n" + " and\n" + x[1][1] + "% (seq2)")
             else: 
-                xticks_new.append(x[0]  + "%" + " and\n" + x[1] + "%")
+                xticks_new.append(x[0]  + "% (seq1)\n" + " and\n" + x[1] + "% (seq2)")
 
     xticks = xticks_new
     # xticks = [ if x[0][0] == "0" then x[0][1] else  x[0] + "%" + " and " + x[1] + "%" for x in xticks]
@@ -111,25 +111,25 @@ def main():
     width = 0.2
 
     fig, ax = plt.subplots()
-    ax.bar(x + 0.2, bar_seq_1, width, label=sequence_ids[0], color = "#DDCC77")
+    ax.bar(x + 0.2, bar_seq_1, width, label="Seq 1: " + sequence_ids[0], color = "#DDCC77")
     ax.errorbar(x + 0.2, bar_seq_1, yerr= np.var(bar_seq_1), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
-    ax.bar(x + 0.4, bar_seq_2, width, label=sequence_ids[1], color = "#332288")
+    ax.bar(x + 0.4, bar_seq_2, width, label="Seq 2: " + sequence_ids[1], color = "#332288")
     ax.errorbar(x + 0.4, bar_seq_2, yerr= np.var(bar_seq_2), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
     ax.bar(x + 0.6, bar_3_nas, width, label="Number of haplotypes not found", color = "#AA4499")
 
     # ax.axhline(y=10, color='black', linestyle='--', label='Number of genomic regions')
 
-    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=35) #, fontweight = "bold")
-    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=35) #, fontweight = "bold")
+    ax.set_ylabel('Edit distance to consensus\n(average over genomic regions)', fontsize=15) #, fontweight = "bold")
+    ax.set_xlabel('Relative abundance for the HIV-1 sequences', fontsize=15) #, fontweight = "bold")
 
     # ax.set_xticks(xticks)
-    ax.legend(fontsize=30)
+    ax.legend(fontsize=12)
     xr = [i  + 0.4 for i in range(0,len(xticks))]
 
     plt.xticks(xr, xticks)
     
-    plt.xticks(fontsize=30, fontweight ="normal")
-    plt.yticks(fontsize=30, fontweight ="normal")
+    plt.xticks(fontsize=12, fontweight ="normal")
+    plt.yticks(fontsize=12, fontweight ="normal")
     plt.ylim([0, 12])
 
     plt.tight_layout()

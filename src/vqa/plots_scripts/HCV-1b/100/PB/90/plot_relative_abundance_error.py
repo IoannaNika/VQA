@@ -140,13 +140,15 @@ def main():
         xticks.append(subdir)
     x = np.arange(len(bar_1))
 
+    fig, ax = plt.subplots()
+
     plt.bar(x, bar_1, yerr=var_1, capsize=3, width=0.2, label='Seq1: ' + seq_ids[0], color ="#5D3A9B")
     plt.bar(x + 0.3, bar_2, yerr=var_2, capsize=3, width=0.2, label='Seq2: ' + seq_ids[1], color ="#E66100")
   # x-ticks are the subdirectories
-    plt.xticks(x, xticks, fontsize = 11)
-    plt.xlabel("Abundance distribution", fontsize=13) #, fontweight='bold')
-    plt.ylabel("Average relative abundance error", fontsize=13) #, fontweight='bold')
-    plt.legend(fontsize=11)
+    plt.xticks(x, xticks, fontsize = 12)
+    plt.xlabel("Abundance distribution", fontsize=15) #, fontweight='bold')
+    plt.ylabel("Average relative abundance error", fontsize=15) #, fontweight='bold')
+    plt.legend(fontsize=12)
     plt.ylim([0, 1.1])
     plt.tight_layout()
 

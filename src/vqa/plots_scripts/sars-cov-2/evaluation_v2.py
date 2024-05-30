@@ -33,20 +33,19 @@ def main():
 
     for file in os.listdir(args.template_dir):
         if file.endswith(".template"):
-            print(file)
             identifier = file[:-9]
             for gr in genomic_regions:
                 gr = str(gr[0]) + "_" + str(gr[1])
+
                 os.system("grep -A 1 +_{}:{}:0 {} > {}".format(identifier, gr, os.path.join(args.template_dir, file), os.path.join(args.data_dir, "temp.fasta")))
+                
                 try:
-                    template = next(SeqIO.parse(os.path.join(args.outdir, "temp.fasta"), "fasta"))
+                    template = next(SeqIO.parse(os.path.join(args.data_dir, "temp.fasta"), "fasta"))
                 except: 
                     continue
-                # if os.stat(os.path.join(args.data_dir, "temp.fasta")).st_size == 0:
-                #         continue
-                template = next(SeqIO.parse(os.path.join(args.data_dir, "temp.fasta"), "fasta"))
+               
                 templates[gr][identifier] = template.seq
-                print(template)
+    
 
     # load consensus
     consensus_sequences = dict()
@@ -68,7 +67,10 @@ def main():
     with open(output_file, "w") as f:
         f.write("genomic_region\ttemplate_id\tconsensus_id\tpredicted_abundance\tabs_relative_ab_error\tedit_distance\tnr_consensus\n")
 
-
+    # for each reconstructed haplotype find the  templates it represents best
+    # temporarily predicted abundance per template is the predicted abundance per consensus
+    # temporarily adjusted abundance is the predicted abundance of the consensus / number of templates it represents best
+    # temporarily the rel_ab_error is calculated with the adjusted abundance (mentioned above)
     for gr in genomic_regions: 
         gr = str(gr[0]) + "_" + str(gr[1])
         
@@ -81,7 +83,7 @@ def main():
             result = {}
 
             result[min_distance] = set()
-            result[min_distance].add(min_template)
+            result[min_distance].add(min_template)  
 
             for template in templates[gr]:
                 template_sequence = templates[gr][template]
@@ -93,11 +95,6 @@ def main():
 
                     if min_distance not in result:
                         result[min_distance] = set()
-                    # if the min_template is already written in the output file with edit distance smaller or equal to the current min_distance dont add it to the set
-                    # load meta results
-                    meta_results = pd.read_csv(output_file, sep="\t", header=0)
-                    gr_results = meta_results[meta_results["genomic_region"] == gr]
-                    result[min_distance].add(min_template)
                 
                 if similarity == min_distance:
                     result[min_distance].add(template)
@@ -130,8 +127,8 @@ def main():
     
     meta_results.to_csv(output_file, sep="\t", index=False)
 
-    # # open it again and calculate and replace the predicted abundance with the adjusted abundance and the absolute relative abundance error
-    # # load meta results
+    # open it again and calculate and replace the predicted abundance with the adjusted abundance and the absolute relative abundance error
+    # load meta results
     meta_results = pd.read_csv(output_file, sep="\t", header=0)
 
     for gr in genomic_regions:
@@ -144,13 +141,12 @@ def main():
             for index, row in meta_results.iterrows():
                 if row["consensus_id"] == consensus_id and row["genomic_region"] == gr:
                     adjusted_ab = "{:.3f}".format((float(row["predicted_abundance"])/n_templates))
-                    abs_relative_ab_error = "{:.3f}".format(abs(float(adjusted_ab) - true_abundance)/true_abundance)
                     meta_results.at[index, "predicted_abundance"] = adjusted_ab
-                    meta_results.at[index, "abs_relative_ab_error"] = abs_relative_ab_error
     
     meta_results.to_csv(output_file, sep="\t", index=False)
 
-    # if a template is represented more than once with the same edit distance add the predicted abundances and keep only one row, adjust the error and the number of consensus and the consensus ids
+    # if a template is represented more than once with the same edit distance add the predicted abundances from all consensus it is represented
+    # and keep only one row, the number of consensus and the consensus ids
     for gr in genomic_regions:
         gr = str(gr[0]) + "_" + str(gr[1])
         gr_results = meta_results[meta_results["genomic_region"] == gr]
@@ -163,16 +159,17 @@ def main():
                     if row["template_id"] == template and row["genomic_region"] == gr:
                         meta_results.at[index, "predicted_abundance"] = predicted_abundance
                         meta_results.at[index, "nr_consensus"] = len(template_results)
-                        abs_relative_ab_error = "{:.3f}".format(abs(float(predicted_abundance) - (true_abundance * len(template_results)))/(true_abundance * len(template_results)))
                         # concatenate consensus ids
                         conc = ""
                         for consensus_id in template_results["consensus_id"].values:
                             conc += consensus_id + "-"
                         meta_results.at[index, "consensus_id" ] = conc[:-1]
                 meta_results.drop(template_results.index[1:], inplace=True)
+    
 
+    meta_results.to_csv(output_file, sep="\t", index=False)
 
-    # normalize relative abundance  and error to sum 1
+    # normalize relative abundance to sum to 1 per genomic region and then calculate relative abundance error
     # load meta results
     meta_results = pd.read_csv(output_file, sep="\t", header=0)
     for gr in genomic_regions:
@@ -182,6 +179,7 @@ def main():
         sum_abundance = sum(gr_results["predicted_abundance"].values)
         for index, row in meta_results.iterrows():
             if row["genomic_region"] == gr:
+                true_abundance = 1/args.n_true_haplotypes
                 adjusted_ab = "{:.3f}".format((float(row["predicted_abundance"])/sum_abundance))
                 meta_results.at[index, "predicted_abundance"] = adjusted_ab
                 meta_results.at[index, "abs_relative_ab_error"] = "{:.3f}".format(abs(float(adjusted_ab) - true_abundance)/true_abundance)

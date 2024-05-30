@@ -7,7 +7,7 @@
 #SBATCH --mem-per-cpu=5120          # Request memory (MB) per node. Default is 1024MB (1GB). For multiple tasks, specify --mem-per-cpu instead
 #SBATCH --output=slurm_insertions_%j.out # Set name of output log. %j is the Slurm jobId
 #SBATCH --error=slurm_insertions_%j.err # Set name of error log. %j is the Slurm jobId
-#SBATCH --gres=gpu:2# Request 1 GPU
+#SBATCH --gres=gpu:1# Request 1 GPU
 
 /usr/bin/nvidia-smi # Check sbatch settings are working (it should show the GPU that you requested)
 
@@ -16,10 +16,11 @@ previous=$(/usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utili
 
 module load cuda/12.2
 
-for n in 1 2 3 4 5 6 7 8 9 10 20 30 40 50
+for n in 60 70 80 90 100
 do 
-    echo "srun python evaluate_binary_LLM_command_line_indelm.py --devices 2 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/insertion_datasets/$n/dataset --outdir Experiments/insertions/$n"
-    srun python evaluate_binary_LLM_command_line_indelm.py --devices 2 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/insertion_datasets/$n/dataset --outdir Experiments/insertions/$n
+    mkdir  Experiments/insertions/$n
+    echo "srun python evaluate_binary_LLM_command_line_indelm.py --devices 1 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/insertion_datasets/$n/dataset --outdir Experiments/insertions/$n"
+    srun python evaluate_binary_LLM_command_line_indelm.py --devices 1 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/insertion_datasets/$n/dataset --outdir Experiments/insertions/$n
 done
 
 

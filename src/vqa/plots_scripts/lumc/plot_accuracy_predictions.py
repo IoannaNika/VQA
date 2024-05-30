@@ -148,7 +148,7 @@ def main():
     plt.xticks(x, xticks, rotation=90, fontsize=9)
     plt.legend(fontsize=9)
 
-    ax.bar(x, bar_accuracy, width, label='Preliminary goViral model', color = "deepskyblue")
+    ax.bar(x, bar_accuracy, width, label='GoViral model', color = "deepskyblue")
     ax.bar(x + 0.3, [nb_dict[key] for key in results.keys()], width, label='Naive Bayes model (baseline)', color= "#FE6100", alpha=0.7)
     ax.set_ylim([0.0, 1.1])
     ax.set_ylabel("Accuracy")
@@ -169,7 +169,7 @@ def main():
 
     plt.tight_layout()
 
-    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_v3.pdf"))
+    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_goViral_only.pdf"))
         
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import Levenshtein
 import editdistance
 
 
+
 def read_ground_truth(gt_dir, sequence_id, genomic_region):
     # read tsv file with ground truth sequences
     gt_file = gt_dir + "/" + sequence_id + ".template"
@@ -57,6 +58,7 @@ def main():
     
 
     file.close()
+
 
 if __name__ == "__main__":
     sys.exit(main())

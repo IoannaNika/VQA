@@ -53,7 +53,7 @@ def main():
     args = parser.parse_args()
 
     genomic_regions = ["72_1065", "985_1946", "1842_2800", "2703_3698", "3495_4459", "4314_5279", "5215_6167", "6068_7008", "6930_7899", "7740_8681", "8300_9280"]
-    sequence_ids = ["D50483.1", "D50482.1"]
+    sequence_ids = ["D50482.1", "D50483.1"]
 
     # get edit distances
     edit_distances = get_edit_distances(args.input_dir, sequence_ids, genomic_regions)
@@ -103,12 +103,12 @@ def main():
 
     for x in xticks: 
         if x[0][0] == "0": 
-            xticks_new.append(x[0][1] + "%" + " and " + x[1] + "%")
+            xticks_new.append(x[0][1] + "% (seq1)\n" + "and\n" + x[1] + "% (seq2)")
         else: 
             if x[1][0] == "0":
-                xticks_new.append(x[0]  + "%" + " and " + x[1][1] + "%")
+                xticks_new.append(x[0]  + "% (seq1)\n" + " and\n" + x[1][1] + "% (seq2)")
             else: 
-                xticks_new.append(x[0]  + "%" + " and " + x[1] + "%")
+                xticks_new.append(x[0]  + "% (seq1)\n" + " and\n" + x[1] + "% (seq2)")
 
     xticks = xticks_new
     # xticks = [ if x[0][0] == "0" then x[0][1] else  x[0] + "%" + " and " + x[1] + "%" for x in xticks]
@@ -118,9 +118,9 @@ def main():
     width = 0.2
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.bar(x + 0.2, bar_seq_1, width, label=sequence_ids[0], color = "#DDCC77")
+    ax.bar(x + 0.2, bar_seq_1, width, label="Seq 1: " + sequence_ids[0], color = "#DDCC77")
     ax.errorbar(x + 0.2, bar_seq_1, yerr= np.var(bar_seq_1), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
-    ax.bar(x + 0.4, bar_seq_2, width, label=sequence_ids[1], color = "#332288")
+    ax.bar(x + 0.4, bar_seq_2, width, label="Seq 2: " +sequence_ids[1], color = "#332288")
     ax.errorbar(x + 0.4, bar_seq_2, yerr= np.var(bar_seq_2), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
     ax.bar(x + 0.6, bar_3_nas, width, label="Number of haplotypes\nnot found", color = "#AA4499")
     ax.axhline(y=11, color='black', linestyle='--', label='Number of genomic regions')

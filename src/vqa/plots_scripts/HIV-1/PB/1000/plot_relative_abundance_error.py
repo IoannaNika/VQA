@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import OrderedDict
 
-
-
-
 def average_predicted_abundance(input_dir, seq_ids, genomic_regions):
     
     avg_predicted_abundance = {}
@@ -96,9 +93,8 @@ def main():
                         true_abundances[key] = {}
                     true_abundances[key][subdir] = data[key]    
 
-    # plot a line that passes from (3, 97), (30, 70), (50, 50), (70, 30), (97, 3)
-    x = [3, 30, 50, 70, 97]
-    y = [3, 30, 50, 70, 97]
+    x = np.arange(7) #[0.3, 3, 30, 50, 70, 97, 99.7]
+    # y = [0.3, 3, 30, 50, 70, 97, 99.7]
 
     # genomic_regions
     genomic_regions = ["30_1028", "947_1907", "1823_2775", "2687_3621", "3516_4474", "4374_5354", "5272_6237", "6126_7120", "7029_8011", "7931_8862"]
@@ -115,16 +111,13 @@ def main():
     var_1 = []
 
 
-    for subdirs in ["ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03"]:
+    for subdirs in ["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"]:
         bar_1.append(np.mean([relative_abundance_error[seq_ids[0]][subdirs][gr] for gr in genomic_regions]))
         var_1.append(np.var([relative_abundance_error[seq_ids[0]][subdirs][gr] for gr in genomic_regions]))
-    
-
-
         
     bar_2 = []
     var_2 = []
-    for  subdirs in["ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03"]:
+    for  subdirs in["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"]:
         bar_2.append(np.mean([relative_abundance_error[seq_ids[1]][subdirs][gr] for gr in genomic_regions]))
         var_2.append(np.var([relative_abundance_error[seq_ids[1]][subdirs][gr] for gr in genomic_regions]))
     
@@ -132,19 +125,27 @@ def main():
    # plot the relative abundance error average per genomic region and per sequence and plot error bars 
     
     xticks = []
-    for subdir in ["ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03"]:
+    for subdir in ["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"] :
         subdir= subdir.split('_')
-        if subdir[1][0] == '0':
+        if subdir[1][0:2] == "00": 
+            subdir [1]= "0.3"
+        if subdir[1][0:2] == "99":
+            subdir[1] = "99.7"
+        if subdir[2][0:2] == "00": 
+            subdir [2]= "0.3"
+        if subdir[2][0:2] == "99":
+            subdir[2] = "99.7"
+        if subdir[1][0:2] == '03':
             subdir[1] ="" + subdir[1][1:]
-        if subdir[2][0] == '0':
+        if subdir[2][0:2] == '03':
             subdir[2] ="" + subdir[2][1:]
-        subdir = subdir[1] + "% (seq1)\n" + "and\n" + subdir[2] + "% (seq2)" 
+        subdir = subdir[1] + "%\n(seq1)" + "\nand\n" + subdir[2] + "%\n(seq2)"
         xticks.append(subdir)
-    x = np.arange(len(bar_1))
 
     plt.bar(x, bar_1, yerr=var_1, capsize=3, width=0.2, label='Seq1: ' + seq_ids[0], color ="#5D3A9B")
     plt.bar(x + 0.3, bar_2, yerr=var_2, capsize=3, width=0.2, label='Seq2: ' + seq_ids[1], color ="#E66100")
-  # x-ticks are the subdirectories
+
+    # x-ticks are the subdirectories
     plt.xticks(x, xticks, fontsize = 12)
     plt.xlabel("Abundance distribution", fontsize = 13) #, fontweight='bold')
     plt.ylabel("Average relative abundance error", fontsize = 13) #, fontweight='bold')

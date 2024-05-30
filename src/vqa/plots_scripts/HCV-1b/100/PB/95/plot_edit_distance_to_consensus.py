@@ -98,12 +98,12 @@ def main():
 
     for x in xticks: 
         if x[0][0] == "0": 
-            xticks_new.append(x[0][1] + "%" + " and " + x[1] + "%")
+            xticks_new.append(x[0][1] + "% (seq1)\n" + "and\n" + x[1] + "% (seq2)")
         else: 
             if x[1][0] == "0":
-                xticks_new.append(x[0]  + "%" + " and " + x[1][1] + "%")
+                xticks_new.append(x[0]  + "% (seq1)\n" + " and\n" + x[1][1] + "% (seq2)")
             else: 
-                xticks_new.append(x[0]  + "%" + " and " + x[1] + "%")
+                xticks_new.append(x[0]  + "% (seq1)\n" + " and\n" + x[1] + "% (seq2)")
 
     xticks = xticks_new
     # xticks = [ if x[0][0] == "0" then x[0][1] else  x[0] + "%" + " and " + x[1] + "%" for x in xticks]
@@ -112,10 +112,10 @@ def main():
     x = np.arange(len(bar_seq_1))
     width = 0.2
 
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.bar(x + 0.2, bar_seq_1, width, label=sequence_ids[0], color = "#DDCC77")
+    fig, ax = plt.subplots()
+    ax.bar(x + 0.2, bar_seq_1, width, label="Seq 1: " +sequence_ids[0], color = "#DDCC77")
     ax.errorbar(x + 0.2, bar_seq_1, yerr= np.var(bar_seq_1), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
-    ax.bar(x + 0.4, bar_seq_2, width, label=sequence_ids[1], color = "#332288")
+    ax.bar(x + 0.4, bar_seq_2, width, label="Seq 2: " +sequence_ids[1], color = "#332288")
     ax.errorbar(x + 0.4, bar_seq_2, yerr= np.var(bar_seq_2), fmt='o', color='black', ecolor='black', elinewidth=0.2, capsize=2)
     ax.bar(x + 0.6, bar_3_nas, width, label="Number of haplotypes not found", color = "#AA4499")
 
@@ -124,14 +124,14 @@ def main():
     ax.set_xlabel('Relative abundance for the HCV-1b sequences', fontsize =15) #, fontweight = "bold")
 
     # ax.set_xticks(xticks)
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=13)
     # plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     xr = [i  + 0.4 for i in range(0,len(xticks))]
 
     plt.xticks(xr, xticks)
     
-    plt.xticks(fontsize=15, fontweight ="normal")
-    plt.yticks(fontsize=15, fontweight ="normal")
+    plt.xticks(fontsize=13, fontweight ="normal")
+    plt.yticks(fontsize=13, fontweight ="normal")
     plt.ylim([0, 5])
 
     plt.tight_layout()

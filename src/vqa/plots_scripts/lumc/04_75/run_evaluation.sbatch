@@ -13,5 +13,6 @@
 bash plots_scripts/lumc/04_75/run_evaluation.sh
 
 
+
 # Measure GPU usage of your job (result)
 /usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utilization,max_memory_usage,time' --format='csv' | /usr/bin/grep -v -F "$previous"

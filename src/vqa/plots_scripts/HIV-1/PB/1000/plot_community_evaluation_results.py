@@ -74,7 +74,7 @@ def main():
         avg_results[subdir]['ratio_edges'] = avg_results[subdir]['n_pred_edges']/avg_results[subdir]['n_true_edges']
 
     # plot homogeneity and completeness for subdirectories and genomic regions in one plot as bar plot groups
-    fig = plt.figure(figsize=(20, 10))
+    fig = plt.figure()
 
 
     # bar with all homogeneity values
@@ -110,37 +110,45 @@ def main():
     for subdir in avg_results.keys():
             variance = np.var([results[subdir][gr]['n_pred_edges']/results[subdir][gr]['n_true_edges'] for gr in results[subdir].keys()])
             variance_ratio_edges.append(variance)
-    plt.axhline(y=1, color='black', linestyle='--')
+    plt.axhline(y=1, color='black', linestyle='--', linewidth=0.1)
     plt.bar(np.arange(len(avg_results.keys())), bars_homogeneity, color='#882255', width=0.2, label='Homogeneity')
-    plt.errorbar(np.arange(len(avg_results.keys())), bars_homogeneity, yerr=variance_homogeneity, fmt='o', color='black', capsize=5)
+    plt.errorbar(np.arange(len(avg_results.keys())), bars_homogeneity, yerr=variance_homogeneity, fmt='o', color='black', capsize=2, elinewidth = 0.2, capthickfloat=0.2)
     plt.bar(np.arange(len(avg_results.keys())) + 0.2, bars_completeness, color='#44AA99', width=0.2, label='Completeness')
-    plt.errorbar(np.arange(len(avg_results.keys())) + 0.2, bars_completeness, yerr=variance_completeness, fmt='o', color='black', capsize=5)
+    plt.errorbar(np.arange(len(avg_results.keys())) + 0.2, bars_completeness, yerr=variance_completeness, fmt='o', color='black', capsize=2, elinewidth = 0.2, capthickfloat=0.2)
     plt.bar(np.arange(len(avg_results.keys())) + 0.4, bars_ratio_communities, color='#DDCC77', width=0.2, label='Ratio of predicted communities to true communities')
-    plt.errorbar(np.arange(len(avg_results.keys())) + 0.4, bars_ratio_communities, yerr=variance_ratio_communities, fmt='o', color='black', capsize=5)
+    plt.errorbar(np.arange(len(avg_results.keys())) + 0.4, bars_ratio_communities, yerr=variance_ratio_communities, fmt='o', color='black', capsize=2, elinewidth = 0.2, capthickfloat=0.2)
     # plt.bar(np.arange(len(avg_results.keys())) + 0.6, bars_ratio_edges, color='#88CCEE', width=0.2, label='Ratio of predicted edges\nto true edges')
-    # plt.errorbar(np.arange(len(avg_results.keys())) + 0.6, bars_ratio_edges, yerr=variance_ratio_edges, fmt='o', color='black', capsize=5)
+    # plt.errorbar(np.arange(len(avg_results.keys())) + 0.6, bars_ratio_edges, yerr=variance_ratio_edges, fmt='o', color='black', capsize=3)
 
     # limit results for y-axis above 0.5
-    plt.ylim(0.5, 1.25)
+    plt.ylim(0, 1.5)
     # make x-ticks more readable
-    plt.yticks(fontsize=30)
+    plt.yticks(fontsize=11)
 
     xticks = []
     for subdir in ["ab_003_997", "ab_03_97", "ab_30_70", "ab_50_50", "ab_70_30", "ab_97_03", "ab_997_003"] :
         subdir= subdir.split('_')
-        if subdir[1][0] == '0':
+        if subdir[1][0:2] == "00": 
+            subdir [1]= "0.3"
+        if subdir[1][0:2] == "99":
+            subdir[1] = "99.7"
+        if subdir[2][0:2] == "00": 
+            subdir [2]= "0.3"
+        if subdir[2][0:2] == "99":
+            subdir[2] = "99.7"
+        if subdir[1][0:2] == '03':
             subdir[1] ="" + subdir[1][1:]
-        if subdir[2][0] == '0':
+        if subdir[2][0:2] == '03':
             subdir[2] ="" + subdir[2][1:]
-        subdir = subdir[1] + "% " + "and " + subdir[2] + "%"
+        subdir = subdir[1] + "% " + "\nand\n" + subdir[2] + "%"
         xticks.append(subdir)
 
         
-    plt.xticks(np.arange(len(avg_results.keys())) + 0.3, xticks, fontsize=30)
+    plt.xticks(np.arange(len(avg_results.keys())) + 0.3, xticks, fontsize=11)
     # put legend outside of the plot in the middle of the right side
-    plt.legend(fontsize=30)
-    plt.ylabel('Average scores\nover genomic regions', fontsize=35) #, fontweight ="bold")
-    plt.xlabel('Relative abundances for the two simulated HIV-1 sequences', fontsize=35) #, fontweight ="bold")
+    plt.legend(fontsize=11)
+    plt.ylabel('Average scores\nover genomic regions', fontsize=13) #, fontweight ="bold")
+    plt.xlabel('Relative abundances for the two simulated HIV-1 sequences', fontsize=13) #, fontweight ="bold")
     # plt.title('HIV-1: Community evaluation results (100x), testing for relative abundance', fontsize=20, fontweight='bold')
     plt.tight_layout()
     plt.savefig(os.path.join(args.output_dir, "community_evaluation_results_v2.pdf"))

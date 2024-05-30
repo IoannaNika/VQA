@@ -22,8 +22,8 @@ module load cuda/12.2
 # echo "srun python train_binary_transformer.py --devices 2 --checkpoint_dir final_checkpoints/ONT --pb False"
 # srun python train_binary_transformer.py --devices 2 --checkpoint_dir final_checkpoints/ONT --pb False
 
-echo "srun python train_binary_transformer.py --devices 2 --checkpoint_dir final_checkpoints/PB_random_lr_2_acc10_r1 --pb True --init_random True"
-srun python train_binary_transformer.py --devices 2 --checkpoint_dir final_checkpoints/PB_random_lr_2_acc10_r1 --pb True --init_random True
+echo "srun python train_binary_transformer.py --devices 2 --checkpoint_dir final_checkpoints/PB_random_lr_2_acc10_r2 --pb True --init_random True"
+srun python train_binary_transformer.py --devices 2 --checkpoint_dir final_checkpoints/PB_random_lr_2_acc10_r2 --pb True --init_random True
 
 # Measure GPU usage of your job (result)
 /usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utilization,max_memory_usage,time' --format='csv' | /usr/bin/grep -v -F "$previous"

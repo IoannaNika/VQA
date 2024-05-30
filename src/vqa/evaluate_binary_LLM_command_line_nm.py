@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--path_to_dataset', dest = 'path_to_dataset', required=True, type=str, help="Path to input dataset")
     parser.add_argument('--append_mode', dest ="append_mode", required=False, default="False", type=str, help="to append to existing prediction file or to create a new one and delete an existing one")
     parser.add_argument('--lumc', dest ="lumc", required=False, default="False", type=str, help="lumc data or not")
+    parser.add_argument('--skip_grs', dest ="skip_grs", required=False, default=0, type=int, help="Number of genomic regions to skip (in order)")
     parser.add_argument('--devices', dest="devices", required=False, default=1, type=int, help="number of gpus")
     args = parser.parse_args()
     
@@ -62,6 +63,7 @@ def main():
     genomic_regions = []
     
     if args.virus_name == "SARS-CoV-2":
+        
         genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 5337),
                             (5286, 6358), (6307, 7379), (7328, 8363), (8282, 9378), (9327, 10429),
                             (10370, 11447), (11394, 12538), (12473, 13599), (13532, 14619),
@@ -69,6 +71,11 @@ def main():
                             (18618, 19655), (19604, 20676), (20581, 21620), (21562, 22590),
                             (22537, 23609), (23544, 24714), (24658, 25768), (25712, 26835),
                             (26766, 27872), (27808, 28985), (28699, 29768), (29768, 29790)]
+
+        if args.skip_grs != 0:
+            genomic_regions = genomic_regions[args.skip_grs:]
+
+
     
     if args.virus_name == "HIV-1":
         genomic_regions = [(30, 1028), (947, 1907), (1823, 2775), (2687, 3621), (3516, 4474), (4374, 5354), (5272, 6237), (6126, 7120), (7029, 8011), (7931, 8862), (8156, 9137)]
@@ -80,6 +87,7 @@ def main():
     for gr in genomic_regions: 
 
         # gr = str(gr[0]) + "_" + str(gr[1])  
+        print(str(gr[0]) + "_" + str(gr[1]))
         if args.lumc == "True":
             data = LUMCReads(directory = args.path_to_dataset, genomic_region = gr, test_mode = True )
         else:
