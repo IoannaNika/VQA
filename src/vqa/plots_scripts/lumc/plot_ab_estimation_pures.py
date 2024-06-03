@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import matplotlib.patches as mpatches
+import pickle
 
 
 def true_abundances():
@@ -110,6 +111,9 @@ def main():
                 else:
                     rel_abundances[sample]["BA.1"][gr] += rel_ab
 
+    # save the relative abundance dictionary to a file
+    with open("Experiments/lumc_subsample/rel_abundances_pures.pkl", "wb") as f:
+        pickle.dump(rel_abundances, f)
     
     
     # a horizontal plot per sample, the x axis is the genomic region, the y axis is the predicted relative abundance per strain

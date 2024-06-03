@@ -16,21 +16,21 @@ previous=$(/usr/bin/nvidia-smi --query-accounted-apps='gpu_utilization,mem_utili
   
 module load cuda/12.2
 
-# for mix in 07_98
-# do  
-#     echo "srun python evaluate_binary_LLM_command_line_nm.py --devices 1 --virus_name SARS-CoV-2 --skip_grs 17 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/natural_mixtures/$mix/subsampled_reads_1000 --outdir Experiments/lumc_subsample/1000/$mix"
-#     srun python evaluate_binary_LLM_command_line_nm.py --devices 1 --virus_name SARS-CoV-2 --skip_grs 17 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/natural_mixtures/$mix/subsampled_reads_1000 --outdir Experiments/lumc_subsample/1000/$mix
-# done
-
-
-for mix in 03_50
+for mix in 07_98
 do  
-    for seed in 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
-    do
-        mkdir Experiments/lumc_subsample/$mix/gr_25712/seed_$seed  
-        srun python evaluate_binary_LLM_command_line_nm.py --devices 1 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/natural_mixtures/$mix/seed_$seed/subsampled_reads_100_25712 --outdir Experiments/lumc_subsample/$mix/gr_25712/seed_$seed  
-    done
+    echo "srun python evaluate_binary_LLM_command_line_nm.py --devices 1 --virus_name SARS-CoV-2 --skip_grs 21 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/natural_mixtures/$mix/subsampled_reads_1000 --outdir Experiments/lumc_subsample/1000/$mix"
+    srun python evaluate_binary_LLM_command_line_nm.py --devices 1 --virus_name SARS-CoV-2 --skip_grs 21 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/natural_mixtures/$mix/subsampled_reads_1000 --outdir Experiments/lumc_subsample/1000/$mix
 done
+
+
+# for mix in 03_50
+# do  
+#     for seed in 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+#     do
+#         mkdir Experiments/lumc_subsample/$mix/gr_25712/seed_$seed  
+#         srun python evaluate_binary_LLM_command_line_nm.py --devices 1 --virus_name SARS-CoV-2 --path_to_dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/natural_mixtures/$mix/seed_$seed/subsampled_reads_100_25712 --outdir Experiments/lumc_subsample/$mix/gr_25712/seed_$seed  
+#     done
+# done
 
 
 # Measure GPU usage of your job (result)

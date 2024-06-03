@@ -64,7 +64,7 @@ def main():
 
     ax.bar(r1, insertions, color='#88CCEE', width=barWidth, edgecolor='white', label='Insertions')
     ax.bar(r2, deletions, color='#CC6677', width=barWidth, edgecolor='white', label='Deletions')
-    ax.bar(r3, mutations, color='#AA4499', width=barWidth, edgecolor='white', label='Mutations')
+    ax.bar(r3, mutations, color='#AA4499', width=barWidth, edgecolor='white', label='Substitutions')
     ax.bar(r4, alls, color='#44AA99', width=barWidth, edgecolor='white', label='All edits')
 
 

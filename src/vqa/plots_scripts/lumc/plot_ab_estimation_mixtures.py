@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import matplotlib.patches as mpatches
+import pickle
 
 
 def true_abundances_func():
@@ -111,6 +112,9 @@ def main():
                 else:
                     rel_abundances[sample]["BA.1"][gr] += rel_ab
 
+    # save the relative abundance dictionary to a file
+    with open("Experiments/lumc_subsample/rel_abundances_mixture.pkl", "wb") as f:
+        pickle.dump(rel_abundances, f)
     
     
     # a horizontal plot per sample, the x axis is the genomic region, the y axis is the predicted relative abundance per strain
@@ -153,8 +157,6 @@ def main():
 
         axs[i].legend(current_handels, current_labels)
         axs[i].legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1)
-
-
     
     # make top shorter
     plt.subplots_adjust(top=0.96)
@@ -175,24 +177,6 @@ def main():
 
     plt.savefig("Experiments/lumc_subsample/relative_abundances_per_sample_mixtures.pdf", bbox_inches='tight')
 
-       
-    
-    
-
-  
-
-        
-
-
-   
-
-    
-
-
-
-    
-   
-    
 
 if __name__ == '__main__':
     main()
