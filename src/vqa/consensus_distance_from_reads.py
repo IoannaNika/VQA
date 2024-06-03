@@ -8,6 +8,32 @@ from Bio import SeqIO
 import pickle 
 
 
+def is_the_coverage_sufficient(reads, gr, low_limit=100):
+    reads_region = reads[reads["Genomic_regions"] == gr]
+    reads_coverage = len(reads_region)
+    if reads_coverage >= low_limit:
+        return True
+    else:
+        return False
+    
+def regions_with_sufficie_coverage_in_sample(reads, low_limit=100):
+    genomic_regions = reads["Genomic_regions"].unique()
+    regions_with_sufficient_coverage = []
+    for gr in genomic_regions:
+        if is_the_coverage_sufficient(reads, gr, low_limit):
+            regions_with_sufficient_coverage.append(gr)
+    return regions_with_sufficient_coverage
+
+def get_grs_with_sufficient_coverage(samples, low_limit=100):
+    sufficient_coverage_per_sample = {}
+
+    for sample in samples:
+        reads_file = "Experiments/lumc_subsample/" + sample + '/communities.tsv'
+        reads = pd.read_csv(reads_file, sep="\t", header=0)
+        sufficient_coverage_per_sample[sample] = regions_with_sufficie_coverage_in_sample(reads, low_limit=100)
+    
+    return sufficient_coverage_per_sample
+
 def mafft_alignment_wuhan_ba1(input_temp_file, output_temp_file, wuhan, ba1):
     # clear any previous temp files
     if os.path.exists(input_temp_file):
@@ -124,7 +150,7 @@ def main():
 
     samples = ["01_100", "02_100", "03_50", "04_75", "05_90", "06_95", "07_98", "08_0", "09_0"]
     consensus_wuhan_dict, consensus_ba1_dict = get_wuhan_omicron_contigs()
-
+    grs_with_high_coverage = get_grs_with_sufficient_coverage(samples, low_limit=100)
     genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 5337),
                             (5286, 6358), (6307, 7379), (7328, 8363), (8282, 9378), (9327, 10429),
                             (10370, 11447), (11394, 12538), (12473, 13599), (13532, 14619),
@@ -136,16 +162,19 @@ def main():
     genomic_regions = [str(region[0]) + "_" + str(region[1]) for region in genomic_regions]
 
     for sample in samples:
+        
         consensus_file = "Experiments/lumc_subsample/" + sample + '/consensus.tsv'
         reads_file = "Experiments/lumc_subsample/" + sample + '/communities.tsv'
 
         consensus = pd.read_csv(consensus_file, sep='\t', header=0)
         reads = pd.read_csv(reads_file, sep='\t', header=0)
 
-        edit_distances_per_sample_consensus[sample] = []
-        edit_distances_per_sample_contigs[sample] = []
+        edit_distances_per_sample_consensus[sample] = {}
+        edit_distances_per_sample_contigs[sample] = {}
         
         for gr in genomic_regions:
+            if gr not in grs_with_high_coverage[sample]:
+                continue
             wuhan_gr = consensus_wuhan_dict[gr]
             ba1_gr = consensus_ba1_dict[gr]
             # get reads for this region
@@ -156,7 +185,9 @@ def main():
                 read_seq = read["Sequence"]
                 ed_wuhan = align_read_to_contig(wuhan_gr, read_seq, gr)
                 ed_ba1 = align_read_to_contig(ba1_gr, read_seq, gr)
-                edit_distances_per_sample_consensus[sample].append(min(ed_wuhan, ed_ba1))
+                if gr not in  edit_distances_per_sample_consensus[sample].keys(): 
+                    edit_distances_per_sample_consensus[sample][gr] = []
+                edit_distances_per_sample_consensus[sample][gr].append(min(ed_wuhan, ed_ba1))
 
                 min_contig_ed = float("inf")
                 for j, contig in contigs_region.iterrows():
@@ -165,10 +196,12 @@ def main():
                     if ed < min_contig_ed:
                         min_contig_ed = ed
                 
-                edit_distances_per_sample_contigs[sample].append(min_contig_ed)
+                if gr not in edit_distances_per_sample_contigs[sample].keys():
+                    edit_distances_per_sample_contigs[sample][gr] = []
+                edit_distances_per_sample_contigs[sample][gr].append(min_contig_ed)
     
-    f_consensus = open("Experiments/lumc_subsample/edit_distances_per_sample_consensus.pkl","wb")
-    f_contigs = open("Experiments/lumc_subsample/edit_distances_per_sample_contigs.pkl", "wb")
+    f_consensus = open("Experiments/lumc_subsample/edit_distances_per_sample_consensus_v2.pkl","wb")
+    f_contigs = open("Experiments/lumc_subsample/edit_distances_per_sample_contigs_v2.pkl", "wb")
 
     pickle.dump(edit_distances_per_sample_consensus, f_consensus)
     f_consensus.close()
