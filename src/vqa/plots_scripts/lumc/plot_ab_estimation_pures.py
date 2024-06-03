@@ -8,6 +8,32 @@ import matplotlib.patches as mpatches
 import pickle
 
 
+def is_the_coverage_sufficient(reads, gr, low_limit=100):
+    reads_region = reads[reads["Genomic_regions"] == gr]
+    reads_coverage = len(reads_region)
+    if reads_coverage >= low_limit:
+        return True
+    else:
+        return False
+    
+def regions_with_sufficie_coverage_in_sample(reads, low_limit=100):
+    genomic_regions = reads["Genomic_regions"].unique()
+    regions_with_sufficient_coverage = []
+    for gr in genomic_regions:
+        if is_the_coverage_sufficient(reads, gr, low_limit):
+            regions_with_sufficient_coverage.append(gr)
+    return regions_with_sufficient_coverage
+
+def get_grs_with_sufficient_coverage(samples, low_limit=100):
+    sufficient_coverage_per_sample = {}
+
+    for sample in samples:
+        reads_file = "Experiments/lumc_subsample/" + sample + '/communities.tsv'
+        reads = pd.read_csv(reads_file, sep="\t", header=0)
+        sufficient_coverage_per_sample[sample] = regions_with_sufficie_coverage_in_sample(reads, low_limit=100)
+    
+    return sufficient_coverage_per_sample
+
 def true_abundances():
 
     true_abundances = { 
@@ -69,6 +95,7 @@ def main():
     rel_abundances = init_rel_abundances(samples, ["BA.1", "Wuhan"], genomic_regions)
     t_abs = true_abundances()
 
+    
     for sample in samples:
         sample_dir = os.path.join(directory, sample)
         input_file = os.path.join(sample_dir, "consensus_lumc_comparison_post_processed.tsv")
@@ -118,6 +145,7 @@ def main():
     
     # a horizontal plot per sample, the x axis is the genomic region, the y axis is the predicted relative abundance per strain
     # in the same plot
+    grs_high_coverage = get_grs_with_sufficient_coverage(samples)
 
     fig, axs = plt.subplots(len(samples), 1, figsize=(10, 10), sharex=True, sharey=True)
     strains = ["BA.1", "Wuhan"]
@@ -126,6 +154,10 @@ def main():
         for strain in strains:
             true_ab = t_abs[sample][strain]
             label_s = strain + " (true abundance: " + str(true_ab) + ")"
+            # set the alpha values based on coverage
+            for gr in genomic_regions:
+                if gr not in grs_high_coverage[sample]:
+                    rel_abundances[sample][strain][gr] = np.nan
             axs[i].scatter(genomic_regions, [rel_abundances[sample][strain][gr] for gr in genomic_regions], label=label_s, color=colors[strains.index(strain)])
         axs[i].set_title(f"Sample name: {sample}", fontsize=12)
     xticks = [gr.replace("_",  "-")  for gr in genomic_regions]
@@ -170,8 +202,8 @@ def main():
     plt.xticks(range(len(genomic_regions)), xticks, rotation=90)
     
     # x axis label and y axis label should be in the middle of the plot
-    plt.xlabel("Genomic region", fontsize=16, labelpad=30, loc="center", position=(0.5, 0.5))
-    fig.text(0.04, 0.5, 'Relative abundance per haplotype', va='center', rotation='vertical', fontsize=16)
+    plt.xlabel("Genomic regions", fontsize=16, labelpad=30, loc="center", position=(0.5, 0.5))
+    fig.text(0.04, 0.5, 'Relative abundance per true haplotype', va='center', rotation='vertical', fontsize=16)
     # plt.tight_layout()
     plt.savefig("Experiments/lumc_subsample/relative_abundances_per_sample_pures.pdf", bbox_inches='tight')
 
