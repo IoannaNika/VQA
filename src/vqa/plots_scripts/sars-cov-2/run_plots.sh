@@ -14,3 +14,5 @@ python plots_scripts/sars-cov-2/plot_evaluation_v2.py --directory Experiments/sa
 # python plots_scripts/sars-cov-2/plot_edit_distances.py --data_dir /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/sars_cov_2/data/  --outdir Experiments/sars_cov_2/PacBio-Hifi/100
 
 python plots_scripts/sars-cov-2/make_summary_statistics.py --data_dir /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/sars_cov_2/data/  --outdir Experiments/sars_cov_2/PacBio-Hifi/100 --directory Experiments/sars_cov_2/PacBio-Hifi/100
+
+python plots_scripts/make_summary_statistics.py --sequence_ids sars-cov-2 --input_dir Experiments/sars_cov_2/ONT --gt_input_dir /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/Experiments_data_planned/sars_cov_2/ONT --output_dir Experiments/sars_cov_2/ONT
