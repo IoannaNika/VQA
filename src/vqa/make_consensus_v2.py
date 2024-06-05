@@ -11,6 +11,20 @@ from Bio.SeqRecord import SeqRecord
 import sys
 import editdistance
 
+def read_ground_truth(gt_dir, sequence_id, genomic_region):
+    # read tsv file with ground truth sequences
+    gt_file = gt_dir + "/" + sequence_id + ".template"
+    # open fasta template file
+    with open(gt_file, "r") as file:
+        lines = file.readlines()
+
+    id_to_be_found = ">+_" + sequence_id + ":" + genomic_region + ":0"
+
+    # find the line with the sequence
+    for i in range(len(lines)):
+        if lines[i].startswith(id_to_be_found):
+            sequence = lines[i+1].strip()
+            return sequence
 
 def make_output_file(output_file_name):
     if os.path.exists(output_file_name):
@@ -94,18 +108,21 @@ def check_and_act_if_consensus_exists(output, genomic_region, consensus, results
             return True  
     return False
 
-
 def main():
     parser = argparse.ArgumentParser(description="Create consensus")
     parser.add_argument('--communities', dest = 'results', required=True, type=str, help="tsv file with communities")
+    parser.add_argument('--gt_dir', dest = 'gt_dir', required=False, type=str, help="directory with ground truth sequences")
     parser.add_argument('--output', dest = 'output', required=True, type=str, help="output file")
+    parser.add_argument('--seq_ids', dest = 'seq_ids', required=False, type=str, help="comma separated list of sequence ids")
+
     args = parser.parse_args()
 
     results = pd.read_csv(args.results, sep='\t', header=0)
     output = args.output
 
     file = make_output_file(output)
-
+    sequence_ids_input = args.seq_ids.split(",")
+    print(args.gt_dir)
     # get genomic regions
     genomic_regions = results["Genomic_regions"].unique()
 
@@ -122,23 +139,29 @@ def main():
             if check_and_act_if_consensus_exists(output, genomic_region, consensus, results_per_community_and_gr, results):
                 continue
             
-            try: 
-                sequence_ids = results_per_community_and_gr["Sequence_id"].tolist()
-                final_sequence_ids = [ seq_id.split("_")[0] for seq_id in sequence_ids]
-                # get the most frequent sequence id
-                sequence_id = max(set(final_sequence_ids), key=final_sequence_ids.count)
-                # write to file
-            except:
-                sequence_id = "NA"
+    
+            gt_sequence = read_ground_truth(args.gt_dir,sequence_ids_input[0], genomic_region)
+            edit_distance_1 = editdistance.eval(consensus, gt_sequence)
+            gt_sequence = read_ground_truth(args.gt_dir,sequence_ids_input[1], genomic_region)
+            edit_distance_2 = editdistance.eval(consensus, gt_sequence)
+
+            if edit_distance_1 < edit_distance_2:
+                sequence_id_chosen = sequence_ids_input[0]
+            elif edit_distance_1 > edit_distance_2:
+                sequence_id_chosen = sequence_ids_input[1]
+            else:
+                sequence_id_chosen = "ambiguous"
+
             number_of_sequences = len(results_per_community_and_gr)
             relative_abundance = number_of_sequences / len(results[results["Genomic_regions"] == genomic_region])
             if number_of_sequences >= 3: 
                 with open(output, "a") as file:
-                    file.write(community + "\t" + genomic_region + "\t" + consensus + "\t" + sequence_id + "\t" + str(number_of_sequences) + "\t" + str(relative_abundance) + "\n")
+                    file.write(community + "\t" + genomic_region + "\t" + consensus + "\t" + sequence_id_chosen + "\t" + str(number_of_sequences) + "\t" + str(relative_abundance) + "\n")
         
-    
     file.close()
     clean_temp_files()
+
+    
 
 if __name__ == "__main__":
     sys.exit(main())

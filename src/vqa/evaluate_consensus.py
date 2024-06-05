@@ -47,6 +47,17 @@ def main():
         genomic_region = consensus_seqs.iloc[i]["Genomic_region"]
         consensus = consensus_seqs.iloc[i]["Consensus"]
         sequence_id = consensus_seqs.iloc[i]["Sequence_id"]
+
+        if sequence_id == "ambiguous":
+            # if the consensus is ambiguous choose randomly one of the sequences
+            seqs = consensus_seqs['Sequence_id'].unique().tolist()
+            seqs.remove("ambiguous")
+            temp_seq_id = seqs[0]
+            gt_sequence = read_ground_truth(args.gt_dir, temp_seq_id, genomic_region)
+            l_ratio = Levenshtein.ratio(consensus, gt_sequence)
+            l_distance = editdistance.eval(consensus, gt_sequence)
+            file.write(genomic_region + "\t" + sequence_id + "\t" + str(l_ratio) + "\t" +  str(l_distance)  + "\t" + consensus + "\t" + gt_sequence + "\n")
+            continue
         # read ground truth sequence
         gt_sequence = read_ground_truth(args.gt_dir, sequence_id, genomic_region)
         # calculate edit distance
