@@ -93,15 +93,19 @@ def align_sequences(directory, sequences):
 
     # read the aligned sequences
     aligned_sequences = []
-    with open(output_file, "r") as f:
-        lines = f.readlines()
-        index = 0
-        while index < len(lines):
-            if lines[index].startswith(">"):
-                aligned_sequences.append(lines[index+1].strip())
-                index += 2
-            else:
-                index += 1
+    for sequence in SeqIO.parse(open(output_file), "fasta"): 
+        aligned_sequences.append(str(sequence.seq).upper())
+
+    # aligned_sequences = []
+    # with open(output_file, "r") as f:
+    #     lines = f.readlines()
+    #     index = 0
+    #     while index < len(lines):
+    #         if lines[index].startswith(">"):
+    #             aligned_sequences.append(lines[index+1].strip())
+    #             index += 2
+    #         else:
+    #             index += 1
 
     
     return aligned_sequences
@@ -114,7 +118,7 @@ def do_they_only_differ_by_Ns(seq1, seq2):
     # case 4: the sequence has an N where the other sequence has a gap
 
     for n1, n2 in zip(seq1, seq2):
-        if n1 != n2 and (n1 == "N" or n2 == "N"):
+        if (n1 != n2 and (n1 == "N" or n2 == "N")) or (n1 == n2):
             continue
         else:
             return False
@@ -271,9 +275,11 @@ def post_process(directory, df, output_file):
         while index_j < len(aligned_sequences):
             seq2 = aligned_sequences[index_j]
             if do_they_only_differ_by_Ns(seq1, seq2):
+                print(seq1, seq2)
                 print("Sequences {} and {} differ only by Ns".format(index_i, index_j))
                 # correct the Ns
                 corrected_seq = correct_Ns(seq1, seq2)
+                print(corrected_seq)
                 aligned_sequences[index_i] = corrected_seq
                 # modify the dataframe
                 df["Consensus"].iloc[index_i] = corrected_seq
@@ -286,7 +292,8 @@ def post_process(directory, df, output_file):
                 df["Min_edit_distance"].iloc[index_i] = results["Min"]
                 df["Min_consensus"].iloc[index_i] = results["Min_consensus"]
                 # delete the second sequence
-                aligned_sequences.pop(index_j)     
+                aligned_sequences.pop(index_j)
+                print(aligned_sequences)     
                 # modify the dataframe
                 df = df.drop(df.index[index_j])     
             else:

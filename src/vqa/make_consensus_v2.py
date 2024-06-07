@@ -10,6 +10,26 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import sys
 import editdistance
+import json
+
+def get_true_abundances(input_dir):
+    true_abundances = {}
+
+    for subdir in os.listdir(input_dir):
+        if subdir[:2] != "ab":
+            continue
+        # make sure is a directory
+        if not os.path.isdir(input_dir + '/' + subdir):
+            continue
+        file = input_dir + '/' + subdir + '/mixture.json'
+        with open(file) as f:
+            data = json.load(f)
+            for key in data:
+                if key not in true_abundances.keys():
+                    true_abundances[key] = {}
+                true_abundances[key][subdir] = data[key]
+
+    return true_abundances
 
 def read_ground_truth(gt_dir, sequence_id, genomic_region):
     # read tsv file with ground truth sequences
@@ -85,6 +105,42 @@ def create_consensus(community, genomic_region, results):
     consensus = str(consensus).replace("-", "")
     return consensus
 
+def do_they_only_differ_by_Ns(seq1, seq2):
+    # if the sequences differ only by Ns: 
+    # case 1: the sequence has an N where the other sequence has a nucleotide
+    # case 2: the sequence has a nucleotide where the other sequence has an N
+    # case 3: the sequence has a gap where the other sequence has an N
+    # case 4: the sequence has an N where the other sequence has a gap
+
+    for n1, n2 in zip(seq1, seq2):
+        if n1 != n2 and (n1 == "N" or n2 == "N") or (n1 == n2):
+            continue
+        else:
+            return False
+    return True
+
+def correct_Ns(seq1, seq2):
+    corrected_seq = ""
+    for n1, n2 in zip(seq1, seq2):            
+        if n1 != n2 and n1 == "N" and n2 != "-" :
+            corrected_seq += n2
+        else: 
+            if n1 != n2 and n1 != "-" and n2 == "N":
+                corrected_seq += n1
+            else:
+                if n1 != n2 and n1 == "N" and n2  == "-":
+                    corrected_seq += n1
+                else:
+    
+                    if n1 != n2 and n1 == "-" and n2 == "N":
+                        corrected_seq += n2
+                    
+                    else:
+                        # if the nucleotides are the same
+                        corrected_seq += n1
+     
+    return corrected_seq
+
 def get_results_per_community_and_genomic_region(community, genomic_region, results):
     results_per_community = results[results["Community"] == int(community)]
     results_per_community_and_gr = results_per_community[results_per_community["Genomic_regions"] == genomic_region]
@@ -104,8 +160,29 @@ def check_and_act_if_consensus_exists(output, genomic_region, consensus, results
             relative_abundance = number_of_sequences / len(results[results["Genomic_regions"] == genomic_region])
             # add the relative abundance to the existing one                    
             output_file.loc[(output_file["Consensus"] == consensus )& (output_file["Genomic_region"] == genomic_region), "Relative_abundance"] += relative_abundance
+            
             output_file.to_csv(output, sep='\t', index=False)
-            return True  
+            return True 
+
+        # align the two sequences with mafft
+        mafft_alignment([consensus_in_output, consensus])
+        alignment = AlignIO.read("temp_output.fasta", "fasta")
+        seq1 = str(alignment[0].seq).upper()
+        seq2 = str(alignment[1].seq).upper()
+
+        # if the sequences differ only by Ns
+        if do_they_only_differ_by_Ns(seq1, seq2):
+            print(genomic_region)
+            corrected_seq = correct_Ns(seq1, seq2).upper()
+            # get the number of sequences for this consensus
+            number_of_sequences = len(results_per_community_and_gr)
+            relative_abundance = number_of_sequences / len(results[results["Genomic_regions"] == genomic_region])
+            # add the relative abundance to the existing one                    
+            output_file.loc[(output_file["Consensus"] == consensus )& (output_file["Genomic_region"] == genomic_region), "Relative_abundance"] += relative_abundance
+            output_file.loc[(output_file["Consensus"] == consensus )& (output_file["Genomic_region"] == genomic_region), "Consensus"] = corrected_seq
+            output_file.to_csv(output, sep='\t', index=False)
+            return True
+
     return False
 
 def main():
@@ -114,7 +191,8 @@ def main():
     parser.add_argument('--gt_dir', dest = 'gt_dir', required=False, type=str, help="directory with ground truth sequences")
     parser.add_argument('--output', dest = 'output', required=True, type=str, help="output file")
     parser.add_argument('--seq_ids', dest = 'seq_ids', required=False, type=str, help="comma separated list of sequence ids")
-
+    parser.add_argument('--mixture_dir', dest = 'mixture_dir', required=False, type=str, help="directory with ground truth sequences abunances")
+    parser.add_argument('--subdir', dest = 'subdir', required=False, type=str, help="subdirectory")
     args = parser.parse_args()
 
     results = pd.read_csv(args.results, sep='\t', header=0)
@@ -161,7 +239,39 @@ def main():
     file.close()
     clean_temp_files()
 
+    # iterate through the output file and for all ambiguous sequences assign the sequence such that the relative abundance error is minimized
+    output_file = pd.read_csv(output, sep='\t', header=0)
+
+    # load true abundance per sequence
+    true_abundances = get_true_abundances(args.mixture_dir)
+
+
+    for gr in genomic_regions:
+        output_file_gr = output_file[output_file["Genomic_region"] == gr]
+        ambiguous_sequences = output_file_gr[output_file_gr["Sequence_id"] == "ambiguous"]
+        non_ambiguous_sequences = output_file_gr[output_file_gr["Sequence_id"] != "ambiguous"]
+        predicted_abundances = {}
+        
+        predicted_abundances[list(true_abundances.keys())[0]] = 0
+        predicted_abundances[list(true_abundances.keys())[1]] = 0
+
+        for i, row in non_ambiguous_sequences.iterrows():
+            predicted_abundances[row["Sequence_id"]] += row["Relative_abundance"]
+
+        for i, row in ambiguous_sequences.iterrows():
+            # abundance difference if ambiguous sequence is assigned to sequence 1
+            error_1 = abs(predicted_abundances[list(true_abundances.keys())[0]] + row["Relative_abundance"] - true_abundances[list(true_abundances.keys())[0]][args.subdir])
+            # abundance difference if ambiguous sequence is assigned to sequence 2
+            error_2 = abs(predicted_abundances[list(true_abundances.keys())[1]] + row["Relative_abundance"] - true_abundances[list(true_abundances.keys())[1]][args.subdir])
+
+            if error_1 < error_2:
+                # assign to sequence 1
+                output_file.loc[(output_file["Genomic_region"] == gr) & (output_file["Sequence_id"] == "ambiguous"), "Sequence_id"] = list(true_abundances.keys())[0]
+            else:
+                # assign to sequence 2
+                output_file.loc[(output_file["Genomic_region"] == gr) & (output_file["Sequence_id"] == "ambiguous"), "Sequence_id"] = list(true_abundances.keys())[1]
     
+    output_file.to_csv(output, sep='\t', index=False)
 
 if __name__ == "__main__":
     sys.exit(main())
