@@ -29,14 +29,15 @@ def main():
         for gr in meta_results["genomic_region"].unique():
             results[h][gr] = dict()
             gr_results = meta_results[meta_results["genomic_region"] == gr]
-            adjusted_abundances = gr_results["abs_relative_ab_error"].values
+            abs_relative_ab_error = gr_results["abs_relative_ab_error"].values
             editdistances = gr_results["edit_distance"].values
             n_consensus = len(gr_results)
             extra_haplotypes = n_consensus - h
             print(h, gr, extra_haplotypes, h, n_consensus)
 
             results[h][gr]["extra_haplotypes"] = extra_haplotypes
-            results[h][gr]["mean_abs_relative_ab_error"] = sum(adjusted_abundances)/n_consensus
+            error_for_not_found_ones = max(0,h-n_consensus)
+            results[h][gr]["mean_abs_relative_ab_error"] = (sum(abs_relative_ab_error) + error_for_not_found_ones)/h
             results[h][gr]["mean_edit_distance"] = sum(editdistances)/n_consensus
             results[h][gr]["false_positives"]  = 0 
 
@@ -135,21 +136,24 @@ def main():
     ax[0,0].set_xticks(haplotypes)
     # xlimit
     ax[0,0].set_xlim(0, 22)
+    ax[0,0].set_ylim(-1, 21)
+
+    # mean rel ab error
     ax[0,1].set_xlim(0, 22)
-    ax[0,0].set_ylim(0, 21)
-    # ax[0,1].set_xlim(0, 22)
-    # ax[1].set_ylim(0, 20)
+    ax[0,1].set_ylim(-0.1, 2.5)
+
     ax[1,0].set_xlim(0, 22)
-    # ax[2].set_ylim(0, 2)
+    ax[1,0].set_ylim(-0.1, 2)
+
     ax[1,1].set_xlim(0, 22)
-    # ax[3].set_ylim(0, 3)
+    ax[1,1].set_ylim(-0.1, 1.2)
 
     ax[0,1].set_xticks(haplotypes)
     ax[1,0].set_xticks(haplotypes)
     ax[1,1].set_xticks(haplotypes)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(args.directory, "evaluation_results_3.pdf"))
+    plt.savefig(os.path.join(args.directory, "evaluation_results_v3.pdf"))
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -17,7 +17,7 @@ def main():
     genomic_regions = [str(region[0]) + "_" + str(region[1]) for region in genomic_regions]
 
     samples = ["01_100", "02_100", "03_50", "04_75", "05_90", "06_95", "07_98", "08_0", "09_0"]
-
+    xticks = ["Wuhan: 100%", "Wuhan: 100%", "Wuhan: 50%\nBA.1: 50%",  "Wuhan: 75%\nBA.1: 25%",  "Wuhan: 90%\nBA.1: 10%",  "Wuhan: 95%\nBA.1: 5%",  "Wuhan: 98%\nBA.1: 2%",  "BA.1: 100%", "BA.1: 100%"]
     # load the dictionaries
     with open("Experiments/lumc_subsample/edit_distances_per_sample_consensus.pkl", "rb") as file:
         edit_distances_per_sample_consensus = pickle.load(file)
@@ -38,13 +38,13 @@ def main():
         patch.set_facecolor(colors_set_2[3])
 
     ax.set_xticks(range(1, len(samples)+1))
-    ax.set_xticklabels(samples)
+    ax.set_xticklabels(xticks, rotation = 90)
     ax.set_xlabel("Samples")
     ax.set_ylabel("Edit distance")
     legend = [plt.Rectangle((0,0),1,1,fc=colors_set_2[i]) for i in [2,3]]
     ax.legend(legend, ['True haplotypes', 'Contigs'], loc='upper right')
     plt.ylim(0, 7)
-    plt.savefig("Experiments/lumc_subsample/edit_distances_consensus_contigs.pdf", bbox_inches='tight')
+    plt.savefig("Experiments/lumc_subsample/edit_distances_consensus_contigs_V2.pdf", bbox_inches='tight')
 
 
 if __name__ == '__main__':

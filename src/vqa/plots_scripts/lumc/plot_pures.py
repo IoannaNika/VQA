@@ -98,31 +98,31 @@ def main():
     input_08 = "Experiments/lumc_subsample/08_0/consensus_lumc_comparison_post_processed.tsv"
 
     df_08 = pd.read_csv(input_08, sep="\t", header=0)
-    sample_name = "08_0"
+    sample_name = "BA.1: 100%"
     n_strains_08 = process_df(df_08)
     offset_080 = -0.3
-    swarm = plot_swarmplot(n_strains_08, sample_name, colors[0], offset_080, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_08, sample_name, colors[0], offset_080, grs_high_coverage["08_0"])
 
     input_01100 = "Experiments/lumc_subsample/01_100/consensus_lumc_comparison_post_processed.tsv"
     df_01100 = pd.read_csv(input_01100, sep="\t", header=0)
-    sample_name = "01_100"
+    sample_name = "Wuhan: 100%"
     n_strains_01100 = process_df(df_01100)
     offset_01100 = -0.10
-    swarm = plot_swarmplot(n_strains_01100, sample_name, colors[1], offset_01100, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_01100, sample_name, colors[1], offset_01100, grs_high_coverage["01_100"])
 
     input_02100 = "Experiments/lumc_subsample/02_100/consensus_lumc_comparison_post_processed.tsv"
     df_02100 = pd.read_csv(input_02100, sep="\t", header=0)
-    sample_name = "02_100"
+    sample_name = "Wuhan: 100%"
     n_strains_02100 = process_df(df_02100)
     offset_02100 = 0.3
-    swarm = plot_swarmplot(n_strains_02100, sample_name, colors[3], offset_02100, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_02100, sample_name, colors[3], offset_02100, grs_high_coverage["02_100"])
 
     input_090 = "Experiments/lumc_subsample/09_0/consensus_lumc_comparison_post_processed.tsv"
     df_090 = pd.read_csv(input_090, sep="\t", header=0)
-    sample_name = "09_0"
+    sample_name = "BA.1: 100%"
     n_strains_090 = process_df(df_090)
     offset_090 = 0.15
-    swarm = plot_swarmplot(n_strains_090, sample_name, colors[2], offset_090, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_090, sample_name, colors[2], offset_090, grs_high_coverage["09_0"])
     
     genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 5337),
                        (5286, 6358), (6307, 7379), (7328, 8363), (8282, 9378), (9327, 10429),
@@ -151,14 +151,14 @@ def main():
     plt.yticks(np.arange(0, 5, 1))
     plt.xlabel("Genomic regions")
     plt.ylabel("Number of haplotypes")
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.10), ncol=5, fontsize=7)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.135), ncol=3, fontsize=7)
     plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.grid(axis='x', linestyle='--', alpha=0.5)
     plt.ylim(0, 3)
     # y-axis should start from 0 but a bit more up to have a better view
     
     plt.tight_layout()
-    plt.savefig(f"Experiments/lumc_subsample/n_strains_pure.pdf", bbox_inches='tight')
+    plt.savefig(f"Experiments/lumc_subsample/n_strains_pure_v2.pdf", bbox_inches='tight')
 
 
 if __name__ == "__main__":

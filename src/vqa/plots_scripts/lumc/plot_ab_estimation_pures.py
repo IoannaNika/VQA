@@ -94,7 +94,6 @@ def main():
     pure_samples = ["01_100", "02_100", "08_0", "09_0"]
     rel_abundances = init_rel_abundances(samples, ["BA.1", "Wuhan"], genomic_regions)
     t_abs = true_abundances()
-
     
     for sample in samples:
         sample_dir = os.path.join(directory, sample)
@@ -139,9 +138,10 @@ def main():
                     rel_abundances[sample]["BA.1"][gr] += rel_ab
 
     # save the relative abundance dictionary to a file
-    with open("Experiments/lumc_subsample/rel_abundances_pures.pkl", "wb") as f:
-        pickle.dump(rel_abundances, f)
+    # with open("Experiments/lumc_subsample/rel_abundances_pures.pkl", "wb") as f:
+    #     pickle.dump(rel_abundances, f)
     
+    # print("here")
     
     # a horizontal plot per sample, the x axis is the genomic region, the y axis is the predicted relative abundance per strain
     # in the same plot
@@ -159,7 +159,7 @@ def main():
                 if gr not in grs_high_coverage[sample]:
                     rel_abundances[sample][strain][gr] = np.nan
             axs[i].scatter(genomic_regions, [rel_abundances[sample][strain][gr] for gr in genomic_regions], label=label_s, color=colors[strains.index(strain)])
-        axs[i].set_title(f"Sample name: {sample}", fontsize=12)
+        # axs[i].set_title(f"Sample name: {sample}", fontsize=12)
     xticks = [gr.replace("_",  "-")  for gr in genomic_regions]
 
 
@@ -185,10 +185,9 @@ def main():
         current_labels.append("Edit distance between consensus = 0")
 
         axs[i].legend(current_handels, current_labels)
-        axs[i].legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1)
+        axs[i].legend(loc='upper center', bbox_to_anchor=(0.5, 1.2), ncol=2)
+        # axs[i].legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=1)
 
-
-    
     # make top shorter
     plt.subplots_adjust(top=0.96)
         
@@ -205,26 +204,10 @@ def main():
     plt.xlabel("Genomic regions", fontsize=16, labelpad=30, loc="center", position=(0.5, 0.5))
     fig.text(0.04, 0.5, 'Relative abundance per true haplotype', va='center', rotation='vertical', fontsize=16)
     # plt.tight_layout()
-    plt.savefig("Experiments/lumc_subsample/relative_abundances_per_sample_pures.pdf", bbox_inches='tight')
-
-       
     
-    
-
-  
-
-        
+    plt.savefig("Experiments/lumc_subsample/relative_abundances_per_sample_pures_v2.pdf", bbox_inches='tight')
 
 
-   
-
-    
-
-
-
-    
-   
-    
 
 if __name__ == '__main__':
     main()

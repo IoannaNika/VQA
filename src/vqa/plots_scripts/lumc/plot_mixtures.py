@@ -93,38 +93,36 @@ def main():
     input_03 = "Experiments/lumc_subsample/03_50/consensus_lumc_comparison_post_processed.tsv"
 
     df_03 = pd.read_csv(input_03, sep="\t", header=0)
-    sample_name = "03_50"
+    sample_name = "Wuhan: 50%, BA.1: 50%"
     n_strains_03 = process_df(df_03)
-    swarm = plot_swarmplot(n_strains_03, sample_name, colors[0], -0.2, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_03, sample_name, colors[0], -0.2, grs_high_coverage["03_50"])
 
     input_04 = "Experiments/lumc_subsample/04_75/consensus_lumc_comparison_post_processed.tsv"
 
     df_04 = pd.read_csv(input_04, sep="\t", header=0)
-    sample_name = "04_75"
+    sample_name = "Wuhan: 75%, BA.1: 25%"
     n_strains_04 = process_df(df_04)
-    swarm = plot_swarmplot(n_strains_04, sample_name, colors[1], -0.05, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_04, sample_name, colors[1], -0.05, grs_high_coverage["04_75"])
 
     input_05 = "Experiments/lumc_subsample/05_90/consensus_lumc_comparison_post_processed.tsv"
-
     df_05 = pd.read_csv(input_05, sep="\t", header=0)
-    sample_name = "05_90"
+    sample_name = "Wuhan: 90%, BA.1: 10%"
     n_strains_05 = process_df(df_05)
-    swarm = plot_swarmplot(n_strains_05, sample_name, colors[2], 0.05, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_05, sample_name, colors[2], 0.05, grs_high_coverage["05_90"])
 
     input_06 = "Experiments/lumc_subsample/06_95/consensus_lumc_comparison_post_processed.tsv"
-
     df_06 = pd.read_csv(input_06, sep="\t", header=0)
-    sample_name = "06_95"
+    sample_name = "Wuhan: 95%, BA.1: 5%"
     n_strains_06 = process_df(df_06)
-    swarm = plot_swarmplot(n_strains_06, sample_name, colors[4], 0.05, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_06, sample_name, colors[4], 0.05, grs_high_coverage['06_95'])
 
 
     input_07 = "Experiments/lumc_subsample/07_98/consensus_lumc_comparison_post_processed.tsv"
     
     df_07 = pd.read_csv(input_07, sep="\t", header=0)
-    sample_name = "07_98"
+    sample_name = "Wuhan: 98%, BA.1: 2%"
     n_strains_07 = process_df(df_07)
-    swarm = plot_swarmplot(n_strains_07, sample_name, colors[3], 0.3, grs_high_coverage[sample_name])
+    swarm = plot_swarmplot(n_strains_07, sample_name, colors[3], 0.3, grs_high_coverage["07_98"])
 
 
     genomic_regions = [(54, 1183), (1128, 2244), (2179, 3235), (3166, 4240), (4189, 5337),
@@ -158,13 +156,13 @@ def main():
     plt.yticks(np.arange(0, 7, 1))
     plt.xlabel("Genomic regions")
     plt.ylabel("Number of haplotypes")
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.10), ncol=6, fontsize=7)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.125), ncol=3, fontsize=7)
     plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.grid(axis='x', linestyle='--', alpha=0.5)
     # y-axis should start from 0 but a bit more up to have a better view
     # plt.subplots_adjust(bottom=0.7)
     plt.tight_layout()
-    plt.savefig(f"Experiments/lumc_subsample/n_strains.pdf", bbox_inches='tight')
+    plt.savefig(f"Experiments/lumc_subsample/n_strains_v2.pdf", bbox_inches='tight')
 
 
 
