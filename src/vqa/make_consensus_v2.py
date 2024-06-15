@@ -113,7 +113,7 @@ def do_they_only_differ_by_Ns(seq1, seq2):
     # case 4: the sequence has an N where the other sequence has a gap
 
     for n1, n2 in zip(seq1, seq2):
-        if n1 != n2 and (n1 == "N" or n2 == "N") or (n1 == n2):
+        if (n1 != n2 and (n1 == "N" or n2 == "N")) or (n1 == n2):
             continue
         else:
             return False
@@ -171,7 +171,7 @@ def check_and_act_if_consensus_exists(output, genomic_region, consensus, results
         seq2 = str(alignment[1].seq).upper()
 
         # if the sequences differ only by Ns
-        if do_they_only_differ_by_Ns(seq1, seq2):
+        if do_they_only_differ_by_Ns(seq1, seq2) and len(seq1) == len(seq2):
             print(genomic_region)
             corrected_seq = correct_Ns(seq1, seq2).upper()
             # get the number of sequences for this consensus
