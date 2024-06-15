@@ -9,7 +9,7 @@ import matplotlib.patches as mpatches
 def main():
 
     directory = "Experiments/lumc_subsample/03_50/gr_25712/seed_"
-    seeds = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+    seeds = range(1,50)
 
     new_tsv = pd.DataFrame(columns=["Genomic_region",	"Consensus",	"Relative_abundance",	"Edit_distance_Wuhan",	"Edit_distance_BA1",	"Min_edit_distance",	"Min_consensus",	"Edit_distance_between_consensus"])
 

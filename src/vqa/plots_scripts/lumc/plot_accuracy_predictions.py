@@ -148,10 +148,17 @@ def main():
     plt.xticks(x, xticks, rotation=90, fontsize=9)
     plt.legend(fontsize=9)
 
-    ax.bar(x, bar_accuracy, width, label='GoViral model', color = "deepskyblue")
-    ax.bar(x + 0.3, [nb_dict[key] for key in results.keys()], width, label='Naive Bayes model (baseline)', color= "#FE6100", alpha=0.7)
-    ax.set_ylim([0.0, 1.1])
-    ax.set_ylabel("Accuracy")
+    # ax.bar(x, bar_accuracy, width, label='GoViral model', color = "deepskyblue")
+    # ax.bar(x + 0.3, [nb_dict[key] for key in results.keys()], width, label='Naive Bayes model (baseline)', color= "#FE6100", alpha=0.7)
+    # ax.set_ylim([0.0, 1.1])
+    # ax.set_ylabel("Accuracy")
+    # ax.set_xlabel('Genomic region')
+    # ax.legend()
+
+    ax.bar(x, bar_recall, width, label='Recall', color = "#56B4E9")
+    ax.bar(x + 0.3, bar_precision, width, label='Precision', color= "#CC79A7")
+    ax.set_ylim([0.0, 1.3])
+    ax.set_ylabel("Score")
     ax.set_xlabel('Genomic region')
     ax.legend()
 
@@ -169,7 +176,7 @@ def main():
 
     plt.tight_layout()
 
-    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_goViral_only.pdf"))
+    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_goViral_recall_precision.pdf"))
         
 
 if __name__ == "__main__":

@@ -6,11 +6,11 @@ import pandas as pd
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dir', dest = 'dir', required=True, type=str, help="File with consensus sequences")
-    
+    parser.add_argument('--input', dest = 'input', required=True, type=str, help="File with consensus sequences")
+    parser.add_argument('--outdir', dest = 'outdir', required=True, type=str, help="")
     args = parser.parse_args()
-    consensus_file = os.path.join(args.dir, "consensus.tsv")
-    out_file_path = os.path.join(args.dir, "consensus.fasta")
+    consensus_file = os.path.join(args.input)
+    out_file_path = os.path.join(args.outdir, "consensus_merged.fasta")
 
     # if it exists, delete it
     if os.path.exists(out_file_path):
@@ -23,7 +23,11 @@ def main():
     consensus = pd.read_csv(consensus_file, sep="\t", header=0)
 
     for index, row in consensus.iterrows():
-        identifier = str(row["Community"]) + "_" + row["Genomic_region"] + "_" + str(row["Relative_abundance"])
+        try: 
+            identifier = str(row["Community"]) + "_" + row["Genomic_region"] + "_" + str(row["Relative_abundance"])
+        except: 
+            identifier = str(index) + "_" + row["Genomic_region"] + "_" + str(row["Relative_abundance"])
+
         sequence = row['Consensus']
         # open file and write the sequence
         with open(out_file_path, "a") as f:

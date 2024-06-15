@@ -182,9 +182,7 @@ def ed_ba1_wuhan(directory, seq, consensus_wuhan, consensus_ba1):
     alignments = list(SeqIO.parse(temp_out, "fasta"))
     seq_aligned = alignments[0].seq
     consensus_aligned_ba1 = alignments[1].seq
-        
 
-    
     # trim both sequences so no gaps are present
     index_start = 0
     index_end = len(seq_aligned)
