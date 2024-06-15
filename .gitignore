@@ -49,3 +49,6 @@ src/vqa/Experiments/*
 src/vqa/checkpoint_binary_transformer_rev_compl/*
 src/vqa/final_checkpoints/*
 src/vqa/results_arch/*
+src/vqa/temp_input_wuhan_ba1.fasta
+src/vqa/temp_output_wuhan_ba1.fasta
+src/vqa/*.fasta
