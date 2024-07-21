@@ -14,6 +14,9 @@ def main():
 
     # load predictions
     predictions = pd.read_csv(args.predictions, sep="\t", header=0)
+    print(len(predictions))
+    predictions = predictions.drop_duplicates()
+    print(len(predictions))
 
     # calculate positive and negative ratio per genomic region
     genomic_regions = predictions["Genomic_region"].unique()
@@ -50,7 +53,7 @@ def main():
     plt.ylabel("Number of positive & negative samples")
     plt.xticks(rotation=90)
     plt.tight_layout()
-    plt.savefig(os.path.join(args.outdir, "pos_neg_ratio.pdf"))
+    plt.savefig(os.path.join(args.outdir, "pos_neg_ratio_v2.pdf"))
         
 
 

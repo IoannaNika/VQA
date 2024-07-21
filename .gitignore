@@ -52,3 +52,5 @@ src/vqa/results_arch/*
 src/vqa/temp_input_wuhan_ba1.fasta
 src/vqa/temp_output_wuhan_ba1.fasta
 src/vqa/*.fasta
+src/vqa/non_used/*
+build/*

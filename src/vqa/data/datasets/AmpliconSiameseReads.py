@@ -11,7 +11,7 @@ class SiameseReads(Dataset):
         self.genomic_region = genomic_region
         self.test_mode = test_mode
         # read tsv
-        self.reference_set = pd.read_csv(os.path.join(self.directory, 'all_test_pairs.tsv'), sep='\t', header=0, on_bad_lines='skip')
+        self.reference_set = pd.read_csv(os.path.join(self.directory), sep='\t', header=0, on_bad_lines='skip')
         if self.genomic_region != None:
             try:
                 start = self.genomic_region.split("_")[0]

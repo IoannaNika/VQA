@@ -42,14 +42,21 @@ def main():
     args = parser.parse_args()
 
     file = os.path.join(args.input_dir, "predictions.tsv")
-    nb_predictions = os.path.join(args.input_dir, "nb_predictions.out")
+    nb_predictions = os.path.join(args.input_dir, "nb_v3.out")
 
     nb_dict = parse_nb(nb_predictions)
 
-
-
-    # read tsv file
     df = pd.read_csv(file, sep='\t', header=0)
+    print(len(df))
+    df = df.drop_duplicates()
+    print(len(df))
+
+    # # remove rows where the Sequence_1_id and Sequence_2_id are the same or the combination of Sequence_1_id and Sequence_2_id are the same
+    # for index, row in df.iterrows():
+    #     # if the combination of Sequence_1_id and Sequence_2_id exists in the dataframe, remove the row
+    #     if df[(['Sequence_1_id'] == row['Sequence_2_id']) & (df['Sequence_2_id'] == row['Sequence_1_id'])].any().any():
+    #         df.drop(index, inplace=True)
+    # print(len(df))
 
     results = {}
 
@@ -148,19 +155,19 @@ def main():
     plt.xticks(x, xticks, rotation=90, fontsize=9)
     plt.legend(fontsize=9)
 
-    # ax.bar(x, bar_accuracy, width, label='GoViral model', color = "deepskyblue")
-    # ax.bar(x + 0.3, [nb_dict[key] for key in results.keys()], width, label='Naive Bayes model (baseline)', color= "#FE6100", alpha=0.7)
-    # ax.set_ylim([0.0, 1.1])
-    # ax.set_ylabel("Accuracy")
-    # ax.set_xlabel('Genomic region')
-    # ax.legend()
-
-    ax.bar(x, bar_recall, width, label='Recall', color = "#56B4E9")
-    ax.bar(x + 0.3, bar_precision, width, label='Precision', color= "#CC79A7")
-    ax.set_ylim([0.0, 1.3])
-    ax.set_ylabel("Score")
+    ax.bar(x, bar_accuracy, width, label='GoViral model', color = "deepskyblue")
+    ax.bar(x + 0.3, [nb_dict[key] for key in results.keys()], width, label='Naive Bayes model (baseline)', color= "#FE6100", alpha=0.7)
+    ax.set_ylim([0.0, 1.1])
+    ax.set_ylabel("Accuracy")
     ax.set_xlabel('Genomic region')
     ax.legend()
+
+    # ax.bar(x, bar_recall, width, label='Recall', color = "#56B4E9")
+    # ax.bar(x + 0.3, bar_precision, width, label='Precision', color= "#CC79A7")
+    # ax.set_ylim([0.0, 1.3])
+    # ax.set_ylabel("Score")
+    # ax.set_xlabel('Genomic region')
+    # ax.legend()
 
     ax2 = ax.twinx() 
     # plt.bar(x+0.2, bar_precision, width, label='Precision', color = "#FFB000")
@@ -176,7 +183,7 @@ def main():
 
     plt.tight_layout()
 
-    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_goViral_recall_precision.pdf"))
+    plt.savefig(os.path.join(args.output_dir, "accuracy_predictions_nd_v3.pdf"))
         
 
 if __name__ == "__main__":
