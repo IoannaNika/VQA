@@ -60,7 +60,9 @@ def main():
         y_true = dataset[(dataset["start"] == start) & (dataset["end"] == end)]["label"].tolist()
         # where label is positive replace with 1 and otherwise 0
         y_true = [1 if i == "positive" else 0 for i in y_true]
+        print(y_true)
         accuracy = accuracy_score(y_true, y_pred)
+        print(gr, y_pred)
         f1 = f1_score(y_true, y_pred)
 
         with open(outfile, "a") as f:

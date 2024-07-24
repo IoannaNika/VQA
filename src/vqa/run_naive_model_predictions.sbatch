@@ -28,16 +28,16 @@
 # echo "srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_rev_compl/all_test_pairs.tsv"
 # srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_rev_compl/all_test_pairs.tsv
 
-echo "python models/NaiveBayesClassifier_M.py"
-python models/NaiveBayesClassifier_M.py
+# echo "python models/NaiveBayesClassifier_M.py"
+# python models/NaiveBayesClassifier_M.py
 
 echo "srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset_pairs_ed_n_m.tsv --model "Experiments/lumc_baselines/mutations/model.pkl" --outdir "Experiments/lumc_baselines/mutations" --distance n_mutations"
 srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset_pairs_ed_n_m.tsv --model "Experiments/lumc_baselines/mutations/model.pkl" --outdir "Experiments/lumc_baselines/mutations" --distance n_mutations
 
 
-echo "srun python models/NaiveBayesClassifier.py"
-srun python models/NaiveBayesClassifier.py
+# echo "srun python models/NaiveBayesClassifier.py"
+# srun python models/NaiveBayesClassifier.py
 
-echo "srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset_pairs_ed_n_m.tsv --model "Experiments/lumc_baselines/edit_distance/model.pkl" --outdir "Experiments/lumc_baselines/edit_distance" --distance edit_distance"
-srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset_pairs_ed_n_m.tsv --model "Experiments/lumc_baselines/edit_distance/model.pkl" --outdir "Experiments/lumc_baselines/edit_distance" --distance edit_distance
+# echo "srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset_pairs_ed_n_m.tsv --model "Experiments/lumc_baselines/edit_distance/model.pkl" --outdir "Experiments/lumc_baselines/edit_distance" --distance edit_distance"
+# srun python run_naive_model_predictions.py --virus_name SARS-CoV-2 --dataset /tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulators/data/lumc_data/lumc_dataset_pairs_ed_n_m.tsv --model "Experiments/lumc_baselines/edit_distance/model.pkl" --outdir "Experiments/lumc_baselines/edit_distance" --distance edit_distance
 

@@ -15,7 +15,7 @@ ref_set_path = "/tudelft.net/staff-umbrella/ViralQuasispecies/inika/Read_simulat
 reference_set = pd.read_csv(ref_set_path, sep='\t', header=0)
 
 pos = list(reference_set[reference_set["label"] == "positive"]["mutations"])
-neg = list(reference_set[(reference_set["label"] == "negative") | (reference_set["label"] == "hard negative")]["mutations"])
+neg = list(reference_set[reference_set["label"] != "positive"]["mutations"])
 
 # plot distribution of edit distances for the positive and negative samples
 # plot them on the same plot
@@ -40,7 +40,6 @@ y = y_pos + y_neg
 
 X = np.asarray(x)
 y = np.asarray(y)
-print(len(X))
 
 X, y = shuffle(X, y, random_state=0)
 
